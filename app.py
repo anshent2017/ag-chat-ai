@@ -41,7 +41,7 @@ with st.sidebar:
     voice_text = speech_to_text(
         start_prompt="🎙️ Start Speaking",
         stop_prompt="🛑 Stop & Process",
-        language='hi', # Captures Hindi and English seamlessly
+        language='hi', 
         use_container_width=True,
         key='native_voice'
     )
@@ -135,8 +135,19 @@ if user_input:
                     stream=False
                 )
                 
-                full_response = completion.choices.message.content
+                # 🎯 FIXED SYNTAX HERE: Choices array ke index 0 alignment ko correct kiya hai crash se bachne ke liye
+                full_response = completion.choices[0].message.content
                 response_placeholder.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
             except Exception as api_err:
                 st.error(f"Neural Engine Connection Error: {str(api_err)}")
+
+    # 🎯 AUTOMATIC FOCUS WINDOW ALIGNMENT INTERACTION HACK
+    components.html("""
+        <script>
+            window.parent.document.querySelector('section.main').scrollTo({
+                top: window.parent.document.querySelector('section.main').scrollHeight,
+                behavior: 'smooth'
+            });
+        </script>
+    """, height=0)

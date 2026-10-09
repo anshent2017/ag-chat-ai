@@ -3,3 +3,9 @@ groq
 duckduckgo-search
 pypdf
 streamlit-mic-recorder
+beautifulsoup4
+requests
+lxml
+pillow
+wikipedia-api
+yfinance

@@ -10,7 +10,11 @@ st.title("🤖 AG Chat.ai - Ultimate Live")
 st.caption("Cloud Powered: High-Speed AI Engine Running")
 
 # Securely reading the key
-GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
+
+# Dynamic Model Selection (Render App Settings se control hoga)
+# Agar Render settings mein model change karenge toh bina code chhue update ho jayega
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-specdec")
 
 client = Groq(api_key=GROQ_API_KEY)
 
@@ -62,14 +66,14 @@ if user_input := st.chat_input("Ask AG Chat.ai anything..."):
         if file_context: system_prompt += f"\n\nDocument Data Context:\n{file_context}"
 
         try:
-            # Active stable endpoint format mapping
+            # Main stable text endpoint format mapping
             completion = client.chat.completions.create(
-                model="llama-3.3-70b-versatile",
+                model=GROQ_MODEL,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_input}
                 ],
-                stream=False, # Standard response processing (never crashes)
+                stream=False, 
             )
 
             # Instantly display the complete reply text data

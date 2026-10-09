@@ -4,7 +4,7 @@ import os
 import requests
 import streamlit.components.v1 as components
 
-#ChatGPT-Gemini Level Wide Production Configuration
+# ChatGPT-Gemini Level Wide Production Configuration
 st.set_page_config(page_title="AG ChatGPT Plus", page_icon="🧠", layout="wide")
 
 st.markdown("""
@@ -16,7 +16,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🧠 AG ChatGPT Plus - Core Master Edition")
-st.caption("2026 Active AI Framework: Voice, Live Scraping & HD Art Pipeline")
+st.caption("2026 Active AI Framework: Voice Auto-Submit, Live Scraping & HD Art Pipeline")
 
 # Secure Token Configuration
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
@@ -37,7 +37,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 🎙️ VOICE COMMAND PLUGIN (Speech Recognition Framework)
+# 🎙️ FIXED VOICE ENGINE (Auto-Submit Feature Injected)
 st.markdown("### 🎙️ Voice Assistant / Bol Kar Search Karein:")
 components.html("""
     <div style="display: flex; align-items: center; gap: 10px; font-family: sans-serif;">
@@ -55,22 +55,39 @@ components.html("""
             recognition.continuous = false;
             recognition.lang = 'hi-IN';
             recognition.interimResults = false;
+            
             startBtn.addEventListener('click', () => {
                 recognition.start();
                 startBtn.style.backgroundColor = '#ff4b4b';
                 startBtn.innerHTML = '🔴 Listening...';
             });
+            
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
                 outputText.innerHTML = '<b>You said:</b> ' + transcript;
                 startBtn.style.backgroundColor = '#1f8fff';
                 startBtn.innerHTML = '🎙️ Start Speaking';
-                const inputArea = window.parent.document.querySelector('textarea[aria-label="Ask AG ChatGPT anything, search global data, or generate HD photos..."]');
-                if(inputArea) {
-                    inputArea.value = transcript;
-                    inputArea.focus();
+                
+                // 🎯 AUTO-SUBMIT HACK: Targets text field and forces native enter keys
+                const textarea = window.parent.document.querySelector('textarea[aria-label="Ask AG ChatGPT anything, search global data, or generate HD photos..."]');
+                if (textarea) {
+                    textarea.value = transcript;
+                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                    
+                    // Simulates exact enter trigger pipeline mapping
+                    setTimeout(() => {
+                        const enterEvent = new KeyboardEvent('keydown', {
+                            bubbles: true, cancelable: true, key: 'Enter', keyCode: 13
+                        });
+                        textarea.dispatchEvent(enterEvent);
+                        
+                        // Fallback click for arrow button if text box lock persists
+                        const sendBtn = window.parent.document.querySelector('button[data-testid="stChatInputSubmitButton"]');
+                        if (sendBtn) sendBtn.click();
+                    }, 500);
                 }
             };
+            
             recognition.onend = () => {
                 startBtn.style.backgroundColor = '#1f8fff';
                 startBtn.innerHTML = '🎙️ Start Speaking';
@@ -145,7 +162,7 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or 
             if web_context:
                 system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
 
-            # Static API Execution Layer (Fixed Indentation Framework)
+            # Static API Execution Layer 
             try:
                 completion = client.chat.completions.create(
                     model=GROQ_MODEL,

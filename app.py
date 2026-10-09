@@ -106,7 +106,7 @@ with st.sidebar:
 
                 rec.onresult = (event) => {
                     clearTimeout(silenceTimer);
-                    const speechToText = event.results[0][0].transcript;
+                    const speechToText = event.results.transcript;
                     statusText.innerHTML = '<b>Transmitting:</b> ' + speechToText;
                     
                     const appUrl = new URL(window.parent.location.href);
@@ -135,10 +135,9 @@ def universal_data_crawler(query_text):
     context = ""
     query_lower = query_text.lower()
     
-    # 📈 टूल 1: रीयल-टाइम फाइनेंस/स्टॉक डेटा (यदि शेयर, स्टॉक, या प्राइस पूछा जाए)
+    # 📈 टूल 1: रीयल-TIME फाइनेंस/स्टॉक डेटा
     if yf and ("stock" in query_lower or "price" in query_lower or "share" in query_lower):
         try:
-            # आसान ट्रैकिंग के लिए शब्दों को अलग करके टिकर खोजने का प्रयास
             words = query_text.upper().split()
             for word in words:
                 if len(word) <= 5 and word.isalpha():
@@ -151,7 +150,7 @@ def universal_data_crawler(query_text):
         except:
             pass
 
-    # 📚 टूल 2: विकिपीडिया इन-डेप्थ रिसर्च (ऐतिहासिक या परिभाषा आधारित डेटा)
+    # 📚 टूल 2: विकिपीडिया इन-डेप्थ रिसर्च
     if wikipediaapi and len(query_text.split()) < 4:
         try:
             wiki = wikipediaapi.Wikipedia('AG_Universal_Bot/1.0 (contact@example.com)', 'en')
@@ -161,7 +160,7 @@ def universal_data_crawler(query_text):
         except:
             pass
 
-    # 🌐 टूल 3: डकडकगो लाइव ग्लोबल वेब पाइपलाइन (लाइव करंट अफेयर्स)
+    # 🌐 टूल 3: डकडकगो लाइव ग्लोबल वेब पाइपलाइन
     try:
         encoded_query = urllib.parse.quote(query_text)
         search_url = f"https://duckduckgo.com{encoded_query}"
@@ -213,8 +212,8 @@ if incoming_payload:
             
             full_response = ""
             for chunk in completion:
-                if chunk.choices[0].delta.content:
-                    full_response += chunk.choices[0].delta.content
+                if chunk.choices.delta.content:
+                    full_response += chunk.choices.delta.content
             
             st.session_state.messages.append({"role": "assistant", "content": full_response})
         except Exception as api_err:
@@ -242,3 +241,7 @@ else:
                     "Always synthesize the multi-source live web pipeline data below with your knowledge base to give hyper-accurate responses."
                 )
                 if web_context:
+                    system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
+
+            try:
+                completion = client.chat.completions.create(

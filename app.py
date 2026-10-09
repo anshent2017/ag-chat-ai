@@ -2,18 +2,20 @@ import streamlit as st
 from groq import Groq
 from duckduckgo_search import DDGS
 import pypdf
-import base64
 import os
 
-# Page Configurations
-st.set_page_config(page_title="AG Chat.ai", page_icon="🤖", layout="centered")
+# Page Title & Layout Configuration
+st.set_page_config(page_title="AG Chat.ai", page_icon="🤖")
 st.title("🤖 AG Chat.ai - Ultimate Live")
-st.caption("Cloud Powered: Photos, Live Search & PDF Scanning")
+st.caption("Cloud Powered: Active Stable Model Running")
+
+# API KEY CONFIGURATION (DIRECT INJECTION)
+# Niche quotes ke andar aap apni website (://groq.com) se generated active key lagayein
+# Abhi test karne ke liye aapki purani active pattern key set hai
 GROQ_API_KEY = "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"
 
-
-if not GROQ_API_KEY or GROQ_API_KEY == "gsk_YAHAN_APNI_REAL_KEY_PASTE_KAREIN":
-    st.error("Please add your actual Groq API Key inside the quotes in app.py code.")
+if not GROQ_API_KEY or GROQ_API_KEY == "YAHAN_APNI_REAL_KEY_PASTE_KAREIN":
+    st.error("Please add your valid Groq API Key inside the quotes in app.py code.")
     st.stop()
 
 client = Groq(api_key=GROQ_API_KEY)
@@ -21,33 +23,21 @@ client = Groq(api_key=GROQ_API_KEY)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# SIDEBAR: Media Center for Photos and PDFs
+# SIDEBAR: Media Center for PDFs only (Stable Text Engine)
 with st.sidebar:
     st.header("📂 Upload Center")
-    uploaded_file = st.file_uploader("Photo ya PDF upload karein", type=["png", "jpg", "jpeg", "pdf"])
-    
+    uploaded_file = st.file_uploader("PDF Document upload karein", type=["pdf"])
     file_context = ""
-    image_base64 = ""
     
     if uploaded_file is not None:
         st.success(f"Loaded: {uploaded_file.name}")
-        
-        # Condition 1: Agar Photo hai
-        if uploaded_file.type in ["image/png", "image/jpeg"]:
-            st.image(uploaded_file, use_container_width=True)
-            bytes_data = uploaded_file.getvalue()
-            image_base64 = base64.b64encode(bytes_data).decode('utf-8')
-            file_context = "[User has uploaded an image. Visually scan the attached content.]"
-            
-        # Condition 2: Agar PDF Document hai
-        elif uploaded_file.type == "application/pdf":
-            with st.spinner("Scanning PDF lines..."):
-                pdf_reader = pypdf.PdfReader(uploaded_file)
-                pdf_text = ""
-                for page in pdf_reader.pages[:5]:
-                    text = page.extract_text()
-                    if text: pdf_text += text
-                file_context = f"\n[Context data from uploaded PDF file ({uploaded_file.name}):]\n{pdf_text[:2500]}"
+        with st.spinner("Scanning PDF lines..."):
+            pdf_reader = pypdf.PdfReader(uploaded_file)
+            pdf_text = ""
+            for page in pdf_reader.pages[:5]:
+                text = page.extract_text()
+                if text: pdf_text += text
+            file_context = f"\n[Context data from PDF file ({uploaded_file.name}):]\n{pdf_text[:2000]}"
 
 # Display Chat History
 for message in st.session_state.messages:
@@ -77,21 +67,16 @@ if user_input := st.chat_input("Ask AG Chat.ai anything..."):
         system_prompt = "You are AG Chat.ai, an elite cloud assistant. Answer accurately based on internet context or document context provided."
         if web_context:
             system_prompt += f"\n\nLive Internet Information:\n{web_context}"
-        if file_context and not image_base64:
+        if file_context:
             system_prompt += f"\n\nDocument Data Context:\n{file_context}"
 
-        content_structure = [{"type": "text", "text": f"{system_prompt}\n\nUser Prompt: {user_input}"}]
-        
-        if image_base64:
-            content_structure.append({
-                "type": "image_url",
-                "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
-            })
-
-        # Super-fast streaming response using stable vision model
+        # 🎯 Production-ready stable text path (Llama-3.1-8b-instant)
         completion = client.chat.completions.create(
-            model="llama-3.2-11b-vision-preview",
-            messages=[{"role": "user", "content": content_structure}],
+            model="llama-3.1-8b-instant",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_input}
+            ],
             stream=True,
         )
 

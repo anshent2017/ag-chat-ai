@@ -16,8 +16,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🧠 AG ChatGPT Plus - Infinite Intelligence")
-st.caption("2026 Enterprise Neural Network: Unlimited Worldwide Web Scraping & Multi-Modal Engine Active")
+st.title("🧠 AG ChatGPT Plus - Voice Intelligence")
+st.caption("2026 Enterprise Neural Network: Voice Search, Global Web Scraping & Multi-Modal Engine Active")
 
 # Secure Key Handshake
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
@@ -49,8 +49,66 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
+# 🎙️ HIGH-SPEED JAVASCRIPT SPEECH TO TEXT WIDGET (Voice Command Engine)
+st.markdown("### 🎙️ Voice Assistant / Bol Kar Search Karein:")
+voice_data = components.html("""
+    <div style="display: flex; align-items: center; gap: 10px; font-family: sans-serif;">
+        <button id="start-btn" style="background-color: #1f8fff; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-size: 16px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
+            🎙️ Start Speaking
+        </button>
+        <span id="output-text" style="color: #a0a0a0; font-style: italic; font-size: 14px;">Click the button and start speaking in Hindi or English...</span>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('start-btn');
+        const outputText = document.getElementById('output-text');
+        
+        // Browser Speech Recognition API Initialization
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
+        if (SpeechRecognition) {
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.lang = 'hi-IN'; // Default matching multi-lingual voice pipeline (Hindi + English)
+            recognition.interimResults = false;
+
+            startBtn.addEventListener('click', () => {
+                recognition.start();
+                startBtn.style.backgroundColor = '#ff4b4b';
+                startBtn.innerHTML = '🔴 Listening...';
+                outputText.innerText = 'Listening to your voice command...';
+            });
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                outputText.style.color = '#1f8fff';
+                outputText.innerHTML = '<b>You said:</b> ' + transcript;
+                startBtn.style.backgroundColor = '#1f8fff';
+                startBtn.innerHTML = '🎙️ Start Speaking';
+                
+                // Direct Injecting text into Streamlit chat input structure dynamically
+                window.parent.document.querySelector('textarea[aria-label="Ask AG ChatGPT anything, search global data, or generate HD photos..."]').value = transcript;
+                window.parent.document.querySelector('textarea[aria-label="Ask AG ChatGPT anything, search global data, or generate HD photos..."]').focus();
+            };
+
+            recognition.onerror = (event) => {
+                startBtn.style.backgroundColor = '#1f8fff';
+                startBtn.innerHTML = '🎙️ Start Speaking';
+                outputText.innerText = 'Error occurred: ' + event.error;
+            };
+            
+            recognition.onend = () => {
+                startBtn.style.backgroundColor = '#1f8fff';
+                startBtn.innerHTML = '🎙️ Start Speaking';
+            };
+        } else {
+            outputText.innerText = 'Speech Recognition not supported on this browser version.';
+        }
+    </script>
+""", height=50)
+
 # Universal Agent Command Input
-if user_input := st.chat_input("Ask anything, search global data, or generate HD photos..."):
+if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or generate HD photos..."):
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
@@ -92,7 +150,6 @@ if user_input := st.chat_input("Ask anything, search global data, or generate HD
             web_context = ""
             with st.spinner("🔍 Deep crawling global web clusters for real-time 2026 data..."):
                 try:
-                    # Bypassing restricted endpoints via open HTML search pipeline scraping
                     search_url = f"https://duckduckgo.com{user_input}+2026"
                     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
                     search_response = requests.get(search_url, headers=headers, timeout=10)
@@ -100,7 +157,6 @@ if user_input := st.chat_input("Ask anything, search global data, or generate HD
                     if search_response.status_code == 200:
                         from bs4 import BeautifulSoup
                         soup = BeautifulSoup(search_response.text, 'html.parser')
-                        # Extracting raw text nodes from all search results blocks globally
                         links = soup.find_all('a', class_='result__snippet')
                         web_data_list = [link.text.strip() for link in links[:4]]
                         if web_data_list:
@@ -131,27 +187,3 @@ if user_input := st.chat_input("Ask anything, search global data, or generate HD
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_input}
                     ],
-                    stream=True, 
-                )
-
-                full_response = ""
-                for chunk in completion:
-                    if chunk.choices and chunk.choices[0].delta.content:
-                        full_response += chunk.choices[0].delta.content
-                        response_placeholder.markdown(full_response + "▌")
-                
-                response_placeholder.markdown(full_response)
-                st.session_state.messages.append({"role": "assistant", "content": full_response})
-                
-            except Exception as e:
-                st.error(f"Neural Engine Connection Error: {str(e)}")
-
-    # 🎯 AUTOMATIC WINDOW ALIGNMENT FOCUS HACK (Smooth Navigation)
-    components.html("""
-        <script>
-            window.parent.document.querySelector('section.main').scrollTo({
-                top: window.parent.document.querySelector('section.main').scrollHeight,
-                behavior: 'smooth'
-            });
-        </script>
-    """, height=0)

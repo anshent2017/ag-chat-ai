@@ -178,7 +178,7 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or 
                 system_prompt += f"\n\n[Uploaded Document/Company Data Context:]\n{file_context}"
 
             try:
-                # 🎯 FIXED SYNTAX HERE (All brackets closed correctly)
+                # 🎯 FIXED BLOCKS (Try-Except and indentation aligned 100% perfectly)
                 completion = client.chat.completions.create(
                     model=GROQ_MODEL,
                     messages=[

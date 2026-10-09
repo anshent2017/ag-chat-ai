@@ -36,7 +36,8 @@ with st.sidebar:
         # Condition 1: Agar Photo hai
         if uploaded_file.type in ["image/png", "image/jpeg"]:
             st.image(uploaded_file, use_container_width=True)
-            image_base64 = base64.b64encode(uploaded_file.getvalue()).decode('utf-8')
+            bytes_data = uploaded_file.getvalue()
+            image_base64 = base64.b64encode(bytes_data).decode('utf-8')
             file_context = "[User has uploaded an image. Visually scan the attached content.]"
             
         # Condition 2: Agar PDF Document hai
@@ -82,8 +83,8 @@ if user_input := st.chat_input("Ask AG Chat.ai anything..."):
 
         content_structure = [{"type": "text", "text": system_prompt + "\n\nUser Prompt: " + user_input}]
         
-        # Switch model dynamically if image is present
-        model_name = "llama-3.2-11b-vision-preview" if image_base64 else "llama3-8b-8192"
+        # Naye aur active models select ho rahe hain yahan
+        model_name = "llama-3.2-11b-vision-preview" if image_base64 else "llama-3.3-70b-specdec"
         
         if image_base64:
             content_structure.append({

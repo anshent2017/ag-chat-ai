@@ -16,7 +16,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🧠 AG ChatGPT Plus - Core Master Edition")
-st.caption("2026 Active AI Framework: Voice Auto-Submit, Live Scraping & HD Art Pipeline")
+st.caption("2026 Active AI Framework: Unified Voice Search, Live Scraping & HD Art Pipeline")
 
 # Secure Token Configuration
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
@@ -26,6 +26,8 @@ client = Groq(api_key=GROQ_API_KEY)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
+if "voice_query" not in st.session_state:
+    st.session_state.voice_query = ""
 
 # SIDEBAR: Standard Data Control Panel
 with st.sidebar:
@@ -37,19 +39,21 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 🎙️ FIXED VOICE ENGINE (Auto-Submit Feature Injected)
+# 🎙️ FIXED VOICE ASSISTANT PIPELINE (Direct Session State Synchronization)
 st.markdown("### 🎙️ Voice Assistant / Bol Kar Search Karein:")
-components.html("""
+voice_result = components.html("""
     <div style="display: flex; align-items: center; gap: 10px; font-family: sans-serif;">
         <button id="start-btn" style="background-color: #1f8fff; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-size: 16px; cursor: pointer; font-weight: bold;">
             🎙️ Start Speaking
         </button>
         <span id="output-text" style="color: #a0a0a0; font-style: italic; font-size: 14px;">Click and speak in Hindi or English...</span>
     </div>
+    
     <script>
         const startBtn = document.getElementById('start-btn');
         const outputText = document.getElementById('output-text');
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             recognition.continuous = false;
@@ -64,28 +68,22 @@ components.html("""
             
             recognition.onresult = (event) => {
                 const transcript = event.results[0][0].transcript;
-                outputText.innerHTML = '<b>You said:</b> ' + transcript;
-                startBtn.style.backgroundColor = '#1f8fff';
-                startBtn.innerHTML = '🎙️ Start Speaking';
+                outputText.innerHTML = '<b>Processing voice... Please wait.</b>';
                 
-                // 🎯 AUTO-SUBMIT HACK: Targets text field and forces native enter keys
+                // 🎯 DIRECT QUERY HANDSHAKE BYPASS: Web URL search state pipeline sync
+                const streamlitRoot = window.parent.document.getElementById("root");
+                
+                // Inject input directly into text area for secondary visibility fallback
                 const textarea = window.parent.document.querySelector('textarea[aria-label="Ask AG ChatGPT anything, search global data, or generate HD photos..."]');
                 if (textarea) {
                     textarea.value = transcript;
                     textarea.dispatchEvent(new Event('input', { bubbles: true }));
-                    
-                    // Simulates exact enter trigger pipeline mapping
-                    setTimeout(() => {
-                        const enterEvent = new KeyboardEvent('keydown', {
-                            bubbles: true, cancelable: true, key: 'Enter', keyCode: 13
-                        });
-                        textarea.dispatchEvent(enterEvent);
-                        
-                        // Fallback click for arrow button if text box lock persists
-                        const sendBtn = window.parent.document.querySelector('button[data-testid="stChatInputSubmitButton"]');
-                        if (sendBtn) sendBtn.click();
-                    }, 500);
                 }
+                
+                // Simulating seamless framework reload via state parameters injection
+                const url = new URL(window.parent.location.href);
+                url.searchParams.set("voice_input", transcript);
+                window.parent.location.href = url.href;
             };
             
             recognition.onend = () => {
@@ -98,8 +96,24 @@ components.html("""
     </script>
 """, height=50)
 
-# Main Terminal Input Box
-if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or generate HD photos..."):
+# Check for URL parameters injection fallback for active session execution
+query_params = st.query_params
+active_voice_input = query_params.get("voice_input", "")
+
+# Unified Query Processing Controller Layer
+user_input = ""
+if active_voice_input:
+    user_input = active_voice_input
+    # Clear parameters to prevent infinite execution loop states
+    st.query_params.clear()
+else:
+    # Text input configuration fallback
+    text_input = st.chat_input("Ask AG ChatGPT anything, search global data, or generate HD photos...")
+    if text_input:
+        user_input = text_input
+
+# Main AI Processing Node Matrix
+if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
@@ -135,7 +149,7 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or 
                     st.error(f"Image Error: {str(img_err)}")
         
         else:
-            # 🌐 RAW HYPER-TEXT WEB SEARCH (Unlimited Scraping Framework)
+            # 🌐 RAW HYPER-TEXT WEB SEARCH
             web_context = ""
             try:
                 search_url = f"https://duckduckgo.com{user_input}+2026"
@@ -162,7 +176,6 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or 
             if web_context:
                 system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
 
-            # Static API Execution Layer 
             try:
                 completion = client.chat.completions.create(
                     model=GROQ_MODEL,
@@ -175,8 +188,8 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or 
                 
                 full_response = ""
                 for chunk in completion:
-                    if chunk.choices and chunk.choices[0].delta.content:
-                        full_response += chunk.choices[0].delta.content
+                    if chunk.choices and chunk.choices.delta.content:
+                        full_response += chunk.choices.delta.content
                         response_placeholder.markdown(full_response + "▌")
                 
                 response_placeholder.markdown(full_response)

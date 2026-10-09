@@ -106,7 +106,7 @@ with st.sidebar:
 
                 rec.onresult = (event) => {
                     clearTimeout(silenceTimer);
-                    const speechToText = event.results.transcript;
+                    const speechToText = event.results[0][0].transcript;
                     statusText.innerHTML = '<b>Transmitting:</b> ' + speechToText;
                     
                     const appUrl = new URL(window.parent.location.href);

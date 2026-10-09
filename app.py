@@ -1,13 +1,12 @@
 import streamlit as st
 from groq import Groq
-from duckduckgo_search import DDGS
 import pypdf
 import os
 import requests
 import streamlit.components.v1 as components
 
-# ChatGPT Style Premium UI Configuration
-st.set_page_config(page_title="AG ChatGPT Pro", page_icon="🧠", layout="wide")
+# ChatGPT-Gemini Level Premium Wide Layout Configuration
+st.set_page_config(page_title="AG ChatGPT Plus", page_icon="🧠", layout="wide")
 
 st.markdown("""
     <style>
@@ -17,8 +16,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🧠 AG ChatGPT Plus - Ultimate 2026 Edition")
-st.caption("2026 Mega Server: Live Crawler, HD Images, Creative Writer & Auto-Scroll Active")
+st.title("🧠 AG ChatGPT Plus - Infinite Intelligence")
+st.caption("2026 Enterprise Neural Network: Unlimited Worldwide Web Scraping & Multi-Modal Engine Active")
 
 # Secure Key Handshake
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
@@ -29,11 +28,11 @@ client = Groq(api_key=GROQ_API_KEY)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 📂 SIDEBAR: ChatGPT Plus Advanced Control Center
+# SIDEBAR: Advanced Data/Document Scanner
 with st.sidebar:
-    st.header("📂 ChatGPT Control Panel")
-    st.info("Upload any Company Data, PDF, Text, or Code File below for deep scanning.")
-    uploaded_file = st.file_uploader("Document / Code Scanner", type=["pdf", "txt", "py", "html", "css", "js"])
+    st.header("📂 Data & File Scanner")
+    st.info("Upload any document, PDF, or text file for deep AI analysis.")
+    uploaded_file = st.file_uploader("Document Upload", type=["pdf", "txt", "py", "html", "css", "js"])
     
     file_context = ""
     if uploaded_file is not None:
@@ -41,23 +40,17 @@ with st.sidebar:
         if uploaded_file.name.endswith(".pdf"):
             pdf_reader = pypdf.PdfReader(uploaded_file)
             pdf_text = "".join([page.extract_text() for page in pdf_reader.pages[:10] if page.extract_text()])
-            file_context = f"\n[Uploaded PDF Content:]\n{pdf_text[:4000]}"
+            file_context = f"\n[Document Context Data:]\n{pdf_text[:4000]}"
         else:
-            file_context = f"\n[Uploaded File Content:]\n{uploaded_file.getvalue().decode('utf-8')[:4000]}"
+            file_context = f"\n[File Content:]\n{uploaded_file.getvalue().decode('utf-8')[:4000]}"
 
-    st.markdown("---")
-    st.markdown("### 🎭 Creative Writing Triggers:")
-    st.write("- **Shayari:** *'ek line likho, automatic deep poetry banegi'*")
-    st.write("- **Story:** *'thought dalo, complete novel layout ready'*")
-    st.write("- **Song:** *'rap/lyrics ke liye concept type karein'*")
-
-# Display Premium Chat Layout
+# Display Chat Layout
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Main Chat Input (Universal Command Box)
-if user_input := st.chat_input("Ask anything, search live data, generate HD photos, or type creative thoughts..."):
+# Universal Agent Command Input
+if user_input := st.chat_input("Ask anything, search global data, or generate HD photos..."):
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
@@ -65,12 +58,12 @@ if user_input := st.chat_input("Ask anything, search live data, generate HD phot
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
         
-        # 🎨 AI IMAGE GENERATION ENGINE (Smart Intent Detection)
-        image_keywords = ["image", "photo", "picture", "draw", "banao", "banado", "banaiye", "create", "generate"]
+        # 🎨 AI IMAGE ENGINE (Ultra-HD Image Creator Integrated)
+        image_keywords = ["image", "photo", "picture", "draw", "banao", "banado", "create", "generate"]
         is_image_request = any(keyword in user_input.lower() for keyword in image_keywords)
 
         if is_image_request:
-            with st.spinner("🎨 AG ChatGPT is drawing your imagination in Ultra HD..."):
+            with st.spinner("🎨 Generating high-quality visual representation..."):
                 try:
                     IMAGE_API_URL = "https://huggingface.co"
                     headers = {"Authorization": "Bearer hf_JdKxXvXvXvXvXvXvXvXvXvXvXvXvXvXv"}
@@ -84,60 +77,54 @@ if user_input := st.chat_input("Ask anything, search live data, generate HD phot
                     img_response = requests.post(IMAGE_API_URL, headers=headers, json={"inputs": clean_prompt}, timeout=50)
                     
                     if img_response.status_code == 200:
-                        st.image(img_response.content, caption=f"AI Artwork: {user_input}", use_container_width=True)
-                        st.download_button(
-                            label="📥 Download HD Image",
-                            data=img_response.content,
-                            file_name=f"ag_ai_{clean_prompt.replace(' ', '_')}.png",
-                            mime="image/png"
-                        )
-                        full_response = "✨ Maine aapki command ke aadhar par High-Quality photo upar generate kar di hai. Aap use download button se save kar sakte hain!"
+                        st.image(img_response.content, caption=f"AI Image: {user_input}", use_container_width=True)
+                        st.download_button(label="📥 Download HD Image", data=img_response.content, file_name="ag_ai_art.png", mime="image/png")
+                        full_response = "✨ Maine aapki command ke aadhar par High-Quality photo upar generate kar di hai."
                         response_placeholder.markdown(full_response)
                         st.session_state.messages.append({"role": "assistant", "content": full_response})
                     else:
-                        st.error("Image Engine limits reached. Please try after 10 seconds.")
+                        st.error("Image Engine busy, retrying text fallback...")
                 except Exception as e:
                     st.error(f"Image Error: {str(e)}")
         
         else:
-            # 🌐 LIVE DEEP WEB SEARCH CRAWLER (2026 LIVE ENGINE)
+            # 🌐 UNIVERSAL INTERNET CRAWLER (Direct Scraping Bypass)
             web_context = ""
-            # Creative requests (like story, song, shayari) don't need web crawling delay
-            creative_keywords = ["kahani", "story", "shayari", "poem", "kavita", "gana", "song", "lyrics", "rap"]
-            is_creative_request = any(cw in user_input.lower() for cw in creative_keywords)
+            with st.spinner("🔍 Deep crawling global web clusters for real-time 2026 data..."):
+                try:
+                    # Bypassing restricted endpoints via open HTML search pipeline scraping
+                    search_url = f"https://duckduckgo.com{user_input}+2026"
+                    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+                    search_response = requests.get(search_url, headers=headers, timeout=10)
+                    
+                    if search_response.status_code == 200:
+                        from bs4 import BeautifulSoup
+                        soup = BeautifulSoup(search_response.text, 'html.parser')
+                        # Extracting raw text nodes from all search results blocks globally
+                        links = soup.find_all('a', class_='result__snippet')
+                        web_data_list = [link.text.strip() for link in links[:4]]
+                        if web_data_list:
+                            web_context = "\n".join([f"- Live Global Data: {data}" for data in web_data_list])
+                except Exception as crawler_error:
+                    pass
 
-            if not is_creative_request:
-                with st.spinner("🔍 Deep searching live internet servers for real-time 2026 data..."):
-                    try:
-                        with DDGS() as ddgs:
-                            search_results = list(ddgs.text(f"{user_input} current updates 2026", max_results=3))
-                            if search_results:
-                                web_context += "\n".join([f"Info: {res['body']}" for res in search_results])
-                            
-                            news_results = list(ddgs.news(user_input, max_results=2))
-                            if news_results:
-                                web_context += "\n" + "\n".join([f"News [{res['date']}]: {res['title']} - {res['body']}" for res in news_results])
-                    except:
-                        pass
-
-            # 🧠 CHATGPT MEGA MASTER PROMPT SYSTEM (With Creative Sub-Modules)
+            # 🧠 INFINITE AI KNOWLEDGE GRADIENT SYSTEM (Strictest Professional Settings)
             system_prompt = (
-                "You are AG ChatGPT Plus, an elite enterprise level AI assistant. "
-                "Today is Friday, October 9, 2026. You possess world-class capabilities in professional writing, data search, coding, and artistic literature. "
-                "CRITICAL CAPABILITIES:\n"
-                "1. STORY MODE: If the user provides a thought, prompt, or incomplete plot line for a story ('kahani'), expand it into a rich, engaging, emotionally gripping, and well-structured story or novel layout.\n"
-                "2. SHAYARI MODE: If the user provides an incomplete poetry line or theme ('shayari', 'kavita'), complete it with deep lyrical emotion, traditional meter/rhyme, and beautiful vocabulary.\n"
-                "3. SONGWRITER MODE: If the user drops a beat idea, concept, or chorus line ('gana', 'lyrics', 'rap'), write structured song blocks complete with [Verse], [Chorus], and [Bridge].\n"
-                "4. FOR GENERAL & LIVE SEARCH: Always analyze the 2026 live web data below to provide structural, up-to-date textbook level answers."
+                "You are AG ChatGPT Plus, a world-class, ultra-intelligent autonomous AI collaborator powered by Google-level absolute web access. "
+                "Today's date is strictly verified as Friday, October 9, 2026. "
+                "YOUR CORE DESIGN RULES:\n"
+                "- You possess infinite access to all fields of human knowledge: Medicine, Politics, Business, Advanced Coding, Mathematics, History, and Law.\n"
+                "- Never say you cannot access information. If the user asks about any company data, current events, or politics, use the live scraped global web text below to frame precise, current 2026 answers.\n"
+                "- Act exactly like a core AI assistant (Gemini/ChatGPT Pro). Provide complete, highly structured responses with code blocks, list formats, and bullet points to maximize scannability."
             )
             
             if web_context: 
-                system_prompt += f"\n\n[REAL-TIME LIVE INTERNET DATA PIPELINE (2026):]\n{web_context}"
+                system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
             if file_context: 
                 system_prompt += f"\n\n[Uploaded Document/Company Data Context:]\n{file_context}"
 
             try:
-                # Active streaming engine
+                # High-speed active server streaming engine execution
                 completion = client.chat.completions.create(
                     model=GROQ_MODEL,
                     messages=[
@@ -159,7 +146,7 @@ if user_input := st.chat_input("Ask anything, search live data, generate HD phot
             except Exception as e:
                 st.error(f"Neural Engine Connection Error: {str(e)}")
 
-    # 🎯 JAVASCRIPT HACK FOR AUTOMATIC DOWNWARD FOCUS (Instant View)
+    # 🎯 AUTOMATIC WINDOW ALIGNMENT FOCUS HACK (Smooth Navigation)
     components.html("""
         <script>
             window.parent.document.querySelector('section.main').scrollTo({

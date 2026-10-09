@@ -9,3 +9,5 @@ lxml
 pillow
 wikipedia-api
 yfinance
+instaloader
+ntscraper

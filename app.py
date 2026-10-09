@@ -68,9 +68,10 @@ if user_input := st.chat_input("Ask AG Chat.ai anything..."):
         if file_context:
             system_prompt += f"\n\nDocument Data Context:\n{file_context}"
 
-        # 🎯 Groq ka bilkul naya active model (Llama 3.3 70B Versatile)
+        # 🎯 Groq ka sabse naya current stable version (openai/gpt-oss-120b)
+        # Note: Is model ke liye reasoning_effort="low" system configuration backend par set hai
         completion = client.chat.completions.create(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_input}

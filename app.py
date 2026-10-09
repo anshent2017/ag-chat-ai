@@ -5,19 +5,18 @@ import pypdf
 import base64
 import os
 import requests
-from io import BytesIO
 
 # ChatGPT Style Premium UI Configuration
 st.set_page_config(page_title="AG ChatGPT Pro", page_icon="🧠", layout="wide")
 
-# Custom CSS for ChatGPT Dark/Light Aesthetic
+# Custom CSS for ChatGPT Dark/Light Aesthetic (Fixed Spelling Here)
 st.markdown("""
     <style>
     .reportview-container { background: #1e1e2e; }
     .stChatInput { position: fixed; bottom: 30px; width: 100%; }
     h1 { color: #1f8fff; font-weight: 700; }
     </style>
-""", unsafe_allowed_html=True)
+""", unsafe_allow_html=True)
 
 st.title("🧠 AG ChatGPT Plus - Ultimate Edition")
 st.caption("2026 Enterprise AI Server: Live Web Crawling, Advanced Coding & HD Image Generation Active")
@@ -97,7 +96,7 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search live data, or ge
                             mime="image/png"
                         )
                         
-                        full_response = f"✨ Main aapki imagination ke aadhar par **'{clean_prompt}'** ki High-Quality photo upar generate kar di hai. Aap use download button se save kar sakte hain!"
+                        full_response = f"✨ Maine aapki imagination ke aadhar par **'{clean_prompt}'** ki High-Quality photo upar generate kar di hai. Aap use download button se save kar sakte hain!"
                         response_placeholder.markdown(full_response)
                         st.session_state.messages.append({"role": "assistant", "content": full_response})
                     else:

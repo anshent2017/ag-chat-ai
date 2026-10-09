@@ -49,9 +49,9 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 🎙️ HIGH-SPEED JAVASCRIPT SPEECH TO TEXT WIDGET (Voice Command Engine)
+# 🎙️ HIGH-SPEED JAVASCRIPT SPEECH TO TEXT WIDGET
 st.markdown("### 🎙️ Voice Assistant / Bol Kar Search Karein:")
-voice_data = components.html("""
+components.html("""
     <div style="display: flex; align-items: center; gap: 10px; font-family: sans-serif;">
         <button id="start-btn" style="background-color: #1f8fff; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-size: 16px; cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 8px;">
             🎙️ Start Speaking
@@ -63,13 +63,12 @@ voice_data = components.html("""
         const startBtn = document.getElementById('start-btn');
         const outputText = document.getElementById('output-text');
         
-        // Browser Speech Recognition API Initialization
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         
         if (SpeechRecognition) {
             const recognition = new SpeechRecognition();
             recognition.continuous = false;
-            recognition.lang = 'hi-IN'; // Default matching multi-lingual voice pipeline (Hindi + English)
+            recognition.lang = 'hi-IN';
             recognition.interimResults = false;
 
             startBtn.addEventListener('click', () => {
@@ -86,7 +85,6 @@ voice_data = components.html("""
                 startBtn.style.backgroundColor = '#1f8fff';
                 startBtn.innerHTML = '🎙️ Start Speaking';
                 
-                // Direct Injecting text into Streamlit chat input structure dynamically
                 window.parent.document.querySelector('textarea[aria-label="Ask AG ChatGPT anything, search global data, or generate HD photos..."]').value = transcript;
                 window.parent.document.querySelector('textarea[aria-label="Ask AG ChatGPT anything, search global data, or generate HD photos..."]').focus();
             };
@@ -116,7 +114,7 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or 
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
         
-        # 🎨 AI IMAGE ENGINE (Ultra-HD Image Creator Integrated)
+        # 🎨 AI IMAGE ENGINE
         image_keywords = ["image", "photo", "picture", "draw", "banao", "banado", "create", "generate"]
         is_image_request = any(keyword in user_input.lower() for keyword in image_keywords)
 
@@ -146,9 +144,9 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or 
                     st.error(f"Image Error: {str(e)}")
         
         else:
-            # 🌐 UNIVERSAL INTERNET CRAWLER (Direct Scraping Bypass)
+            # 🌐 UNIVERSAL INTERNET CRAWLER
             web_context = ""
-            with st.spinner("🔍 Deep crawling global web clusters for real-time 2026 data..."):
+            with st.spinner("🔍 Deep crawling global web clusters for real-time data..."):
                 try:
                     search_url = f"https://duckduckgo.com{user_input}+2026"
                     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
@@ -164,13 +162,13 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or 
                 except Exception as crawler_error:
                     pass
 
-            # 🧠 INFINITE AI KNOWLEDGE GRADIENT SYSTEM (Strictest Professional Settings)
+            # 🧠 INFINITE AI KNOWLEDGE GRADIENT SYSTEM
             system_prompt = (
                 "You are AG ChatGPT Plus, a world-class, ultra-intelligent autonomous AI collaborator powered by Google-level absolute web access. "
                 "Today's date is strictly verified as Friday, October 9, 2026. "
                 "YOUR CORE DESIGN RULES:\n"
                 "- You possess infinite access to all fields of human knowledge: Medicine, Politics, Business, Advanced Coding, Mathematics, History, and Law.\n"
-                "- Never say you cannot access information. If the user asks about any company data, current events, or politics, use the live scraped global web text below to frame precise, current 2026 answers.\n"
+                "- Never say you cannot access information. If the user asks about any company data, current events, or politics, use the live scraped global web text below to frame precise, current answers.\n"
                 "- Act exactly like a core AI assistant (Gemini/ChatGPT Pro). Provide complete, highly structured responses with code blocks, list formats, and bullet points to maximize scannability."
             )
             
@@ -180,10 +178,19 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search global data, or 
                 system_prompt += f"\n\n[Uploaded Document/Company Data Context:]\n{file_context}"
 
             try:
-                # High-speed active server streaming engine execution
+                # 🎯 FIXED SYNTAX HERE (All brackets closed correctly)
                 completion = client.chat.completions.create(
                     model=GROQ_MODEL,
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_input}
                     ],
+                    stream=True
+                )
+
+                full_response = ""
+                for chunk in completion:
+                    if chunk.choices and chunk.choices[0].delta.content:
+                        full_response += chunk.choices[0].delta.content
+                        response_placeholder.markdown(full_response + "▌")
+                

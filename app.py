@@ -2,16 +2,16 @@ import streamlit as st
 from groq import Groq
 from duckduckgo_search import DDGS
 import pypdf
-import base64
 import os
 
 # Page Title & Layout Configuration
-st.set_page_config(page_title="AG Chat.ai", page_icon="🤖", layout="centered")
-st.title("🤖 AG Chat.ai - Ultimate Live")
-st.caption("Cloud Powered: Photos, Live Search & PDF Scanning Active")
+st.set_page_config(page_title="AG Chat.ai", page_icon="🤖")
+st.title("🤖 AG Chat.ai - Fully Live 2026")
+st.caption("Cloud Powered: Live Internet Data Integration Active")
 
 # Securely reading the key from Render settings
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
+# Groq par abhi chalne wala stable endpoint
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b")
 
 client = Groq(api_key=GROQ_API_KEY)
@@ -19,33 +19,21 @@ client = Groq(api_key=GROQ_API_KEY)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 📂 SIDEBAR: Media Upload Center (Yeh option ab App mein dikhega)
+# SIDEBAR: Media Center for PDFs only
 with st.sidebar:
-    st.header("📂 Media Upload Center")
-    # Yahan humne png, jpg, jpeg aur pdf sab ek sath allow kar diya hai
-    uploaded_file = st.file_uploader("Photo ya PDF Document upload karein", type=["png", "jpg", "jpeg", "pdf"])
-    
+    st.header("📂 Upload Center")
+    uploaded_file = st.file_uploader("PDF Document upload karein", type=["pdf"])
     file_context = ""
-    image_base64 = ""
     
     if uploaded_file is not None:
         st.success(f"Loaded: {uploaded_file.name}")
-        
-        # Condition 1: Agar user ne Photo upload ki hai
-        if uploaded_file.type in ["image/png", "image/jpeg"]:
-            st.image(uploaded_file, use_container_width=True)
-            image_base64 = base64.b64encode(uploaded_file.getvalue()).decode('utf-8')
-            file_context = "[User has uploaded an image. Visually scan the attached content.]"
-            
-        # Condition 2: Agar user ne PDF upload ki hai
-        elif uploaded_file.type == "application/pdf":
-            with st.spinner("Scanning PDF lines..."):
-                pdf_reader = pypdf.PdfReader(uploaded_file)
-                pdf_text = ""
-                for page in pdf_reader.pages[:5]:
-                    text = page.extract_text()
-                    if text: pdf_text += text
-                file_context = f"\n[Context data from PDF file ({uploaded_file.name}):]\n{pdf_text[:2000]}"
+        with st.spinner("Scanning PDF lines..."):
+            pdf_reader = pypdf.PdfReader(uploaded_file)
+            pdf_text = ""
+            for page in pdf_reader.pages[:5]:
+                text = page.extract_text()
+                if text: pdf_text += text
+            file_context = f"\n[Context data from PDF file ({uploaded_file.name}):]\n{pdf_text[:2000]}"
 
 # Display Chat History
 for message in st.session_state.messages:
@@ -61,38 +49,35 @@ if user_input := st.chat_input("Ask AG Chat.ai anything..."):
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
         
-        # Live Web Search Trigger
+        # 🌐 LIVE INTERNET CRAWLER (DuckDuckGo Live Search Engine)
         web_context = ""
         try:
             with DDGS() as ddgs:
-                search_results = [r for r in ddgs.text(user_input, max_results=2)]
+                search_results = list(ddgs.text(user_input, max_results=2))
                 if search_results:
                     web_context = "\n".join([f"- {res['body']}" for res in search_results])
-        except:
+        except Exception as e:
             pass
 
-        system_prompt = "You are AG Chat.ai, an elite cloud assistant. Answer accurately based on internet context or document context provided."
-        if web_context: system_prompt += f"\n\nLive Internet Information:\n{web_context}"
-        if file_context and not image_base64: system_prompt += f"\n\nDocument Data Context:\n{file_context}"
-
-        content_structure = [{"type": "text", "text": f"{system_prompt}\n\nUser Prompt: {user_input}"}]
-        
-        # Agar photo hai toh vision model chalega, nahi toh standard text model
-        active_model = "llama-3.2-11b-vision-preview" if image_base64 else GROQ_MODEL
-        
-        if image_base64:
-            content_structure.append({
-                "type": "image_url",
-                "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
-            })
+        # 🎯 STRICT COMMAND FOR 2026 LIVE UPDATES
+        system_prompt = "You are AG Chat.ai, an elite live assistant. Current year is 2026. You MUST use the provided live search data to answer accurately."
+        if web_context: 
+            system_prompt += f"\n\n[CRITICAL: Live Internet Data from Today (2026):]\n{web_context}"
+        if file_context: 
+            system_prompt += f"\n\n[Document Data Context:]\n{file_context}"
 
         try:
+            # ⚡ FIXED API STRUCTURE: Ab system prompt directly AI ke dimaag me jaayega
             completion = client.chat.completions.create(
-                model=active_model,
-                messages=[{"role": "user", "content": content_structure}],
+                model=GROQ_MODEL,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_input}
+                ],
                 stream=False, 
             )
 
+            # Display the real-time live data response
             full_response = completion.choices[0].message.content
             response_placeholder.markdown(full_response)
             st.session_state.messages.append({"role": "assistant", "content": full_response})

@@ -9,7 +9,7 @@ import requests
 # ChatGPT Style Premium UI Configuration
 st.set_page_config(page_title="AG ChatGPT Pro", page_icon="🧠", layout="wide")
 
-# Custom CSS for ChatGPT Dark/Light Aesthetic (Fixed Spelling Here)
+# Custom CSS for ChatGPT Dark/Light Aesthetic
 st.markdown("""
     <style>
     .reportview-container { background: #1e1e2e; }
@@ -140,7 +140,8 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search live data, or ge
                     stream=False,
                 )
 
-                full_response = completion.choices.message.content
+                # 🎯 FIXED HERE: choices[0] array alignment for correct parsing
+                full_response = completion.choices[0].message.content
                 response_placeholder.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
                 

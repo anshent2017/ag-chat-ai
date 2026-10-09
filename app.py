@@ -9,10 +9,8 @@ import os
 st.set_page_config(page_title="AG Chat.ai", page_icon="🤖", layout="centered")
 st.title("🤖 AG Chat.ai - Ultimate Live")
 st.caption("Cloud Powered: Photos, Live Search & PDF Scanning")
-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
-# 🎯 DIRECT API KEY INJECTION (Kanyat/Settings ka jhanjhat khatam)
-# Niche quotes ke andar apni asli gsk_... waali API Key paste karein
-GROQ_API_KEY = "gsk_YAHAN_APNI_REAL_KEY_PASTE_KAREIN"
+GROQ_API_KEY = "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"
+
 
 if not GROQ_API_KEY or GROQ_API_KEY == "gsk_YAHAN_APNI_REAL_KEY_PASTE_KAREIN":
     st.error("Please add your actual Groq API Key inside the quotes in app.py code.")

@@ -2,7 +2,7 @@ import streamlit as st
 from groq import Groq
 import os
 import requests
-from streamlit_mic_recorder import speech_to_text
+import streamlit.components.v1 as components
 
 # ChatGPT-Gemini Level Wide Production Configuration
 st.set_page_config(page_title="AG ChatGPT Plus", page_icon="🧠", layout="wide")
@@ -16,7 +16,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🧠 AG ChatGPT Plus - Executive AI")
-st.caption("2026 Enterprise Network: Official Native Voice Search & Global Web Crawler Active")
+st.caption("2026 Enterprise Network: Smart Auto-Silence Voice Search & Global Web Crawler Active")
 
 # Secure Token Configuration
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
@@ -36,22 +36,84 @@ with st.sidebar:
     st.info("Directly input prompts, create imagery, or request complex solutions.")
     st.markdown("---")
     
-    # 🎙️ OFFICIAL NATIVE VOICE SEARCH (Bypasses all browser security blocks)
+    # 🎙️ SMART AUTO-SILENCE VOICE SYSTEM (5 Seconds Silence Timer Trigger)
     st.markdown("### 🎙️ Bol Kar Search Karein:")
-    voice_text = speech_to_text(
-        start_prompt="🎙️ Start Speaking",
-        stop_prompt="🛑 Stop & Process",
-        language='hi', 
-        use_container_width=True,
-        key='native_voice'
-    )
-    
-    if voice_text:
-        st.success(f"Captured: {voice_text}")
-        user_input = voice_text
+    components.html("""
+        <div style="font-family: sans-serif; text-align: center; padding: 5px;">
+            <button id="voice-start" style="background-color: #1f8fff; color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 16px; cursor: pointer; font-weight: bold; width: 100%;">
+                🎙️ Tap to Speak
+            </button>
+            <div id="voice-status" style="color: #a0a0a0; font-style: italic; font-size: 13px; margin-top: 8px;">Click to talk...</div>
+        </div>
+        <script>
+            const voiceBtn = document.getElementById('voice-start');
+            const statusText = document.getElementById('voice-status');
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (SpeechRecognition) {
+                const rec = new SpeechRecognition();
+                // 🎯 STRICT TIMING TRIGGERS
+                rec.continuous = false; // Turn off continuous mode to let native silence trigger work
+                rec.lang = 'hi-IN'; 
+                rec.interimResults = false;
+                
+                let silenceTimer;
 
-# Text input configuration fallback (if not using voice)
-if not user_input:
+                voiceBtn.addEventListener('click', () => {
+                    rec.start();
+                    voiceBtn.style.backgroundColor = '#ff4b4b';
+                    voiceBtn.innerHTML = '🔴 Listening...';
+                    statusText.innerText = 'Speak now clearly...';
+                });
+                
+                // Triggers when user starts speaking or shifts pause states
+                rec.onsoundstart = () => {
+                    clearTimeout(silenceTimer);
+                };
+
+                rec.onsoundend = () => {
+                    // 🎯 5 SECOND AUTO-STOP INJECTION
+                    statusText.innerText = 'Detecting silence... processing in 5s...';
+                    silenceTimer = setTimeout(() => {
+                        rec.stop();
+                    }, 5000); 
+                };
+
+                rec.onresult = (event) => {
+                    clearTimeout(silenceTimer);
+                    const speechToText = event.results[0][0].transcript;
+                    statusText.innerHTML = '<b>Transmitting:</b> ' + speechToText;
+                    
+                    // Transmit to browser parameters instantly bypassing address bars
+                    const appUrl = new URL(window.parent.location.href);
+                    appUrl.searchParams.set("voice_data_stream", speechToText);
+                    window.parent.location.href = appUrl.href;
+                };
+                
+                rec.onend = () => {
+                    clearTimeout(silenceTimer);
+                    voiceBtn.style.backgroundColor = '#1f8fff';
+                    voiceBtn.innerHTML = '🎙️ Tap to Speak';
+                };
+                
+                rec.onerror = (e) => {
+                    clearTimeout(silenceTimer);
+                    statusText.innerText = 'Error or Timeout. Tap again.';
+                };
+            } else {
+                statusText.innerText = 'Microphone hardware connection missing.';
+            }
+        </script>
+    """, height=100)
+
+# Check for incoming voice parameters state handshake execution
+incoming_params = st.query_params
+active_stream_data = incoming_params.get("voice_data_stream", "")
+
+if active_stream_data:
+    user_input = active_stream_data
+    st.query_params.clear() 
+else:
     text_box_input = st.chat_input("Ask AG ChatGPT anything, search global data, or generate HD photos...")
     if text_box_input:
         user_input = text_box_input
@@ -119,8 +181,7 @@ if user_input:
                 "You are AG ChatGPT Plus, a world-class autonomous AI collaborator powered by absolute web access. "
                 "Today's date is verified as Friday, October 9, 2026. "
                 "You possess absolute capability across all fields: Medicine, Politics, Business, Advanced Software Architecture, Coding, History, and Creative Writing. "
-                "Always combine the live global search data below with your neural networks to frame highly comprehensive, scannable responses using markdown format. "
-                "If the user asks for a story ('kahani'), song ('gana'), or poetry ('shayari'), expand it with deep creative richness."
+                "Always combine the live global search data below with your neural networks to frame highly comprehensive, scannable responses using markdown format."
             )
             if web_context:
                 system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
@@ -135,7 +196,7 @@ if user_input:
                     stream=False
                 )
                 
-                # 🎯 FIXED SYNTAX HERE: Choices array ke index 0 alignment ko correct kiya hai crash se bachne ke liye
+                # Fixed choice array parsing index framework mapping
                 full_response = completion.choices[0].message.content
                 response_placeholder.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})

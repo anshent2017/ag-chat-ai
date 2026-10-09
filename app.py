@@ -98,8 +98,7 @@ with st.sidebar:
                 rec.onend = () => { voiceBtn.style.backgroundColor = '#1f8fff'; voiceBtn.innerHTML = '🎙️ Tap to Speak'; };
             } else { statusText.innerText = 'Microphone connection missing.'; }
         </script>
-    """, height=100)
-    # 🌐 DEEP SOCIAL MEDIA & GLOBAL CRAWLER ENGINE
+    """, height=100)# 🌐 DEEP SOCIAL MEDIA & GLOBAL CRAWLER ENGINE
 def fetch_global_and_social_search(query_text):
     context = ""
     query_lower = query_text.lower()

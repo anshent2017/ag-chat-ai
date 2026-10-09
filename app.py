@@ -9,7 +9,6 @@ import requests
 # ChatGPT Style Premium UI Configuration
 st.set_page_config(page_title="AG ChatGPT Pro", page_icon="🧠", layout="wide")
 
-# Custom CSS for ChatGPT Dark/Light Aesthetic
 st.markdown("""
     <style>
     .reportview-container { background: #1e1e2e; }
@@ -66,9 +65,9 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search live data, or ge
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
         
-        # 🎨 AI IMAGE GENERATION ENGINE TRIGGER
-        image_triggers = ["generate image", "create image", "photo banao", "picture banao", "image of", "photo of", "banao photo"]
-        is_image_request = any(trigger in user_input.lower() for trigger in image_triggers)
+        # 🎨 SUPER FLEXIBLE SMART IMAGE DETECTION (Hindi + English All Keywords Added)
+        image_keywords = ["image", "photo", "picture", "draw", "paint", "banao", "banado", "banaiye", "create", "generate", "illustration"]
+        is_image_request = any(keyword in user_input.lower() for keyword in image_keywords)
 
         if is_image_request:
             with st.spinner("🎨 AG ChatGPT is drawing your imagination in Ultra HD..."):
@@ -77,18 +76,21 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search live data, or ge
                     IMAGE_API_URL = "https://huggingface.co"
                     headers = {"Authorization": "Bearer hf_JdKxXvXvXvXvXvXvXvXvXvXvXvXvXvXv"}
                     
-                    # Clean prompt text extracting
+                    # English Translation prompt optimization injection
                     clean_prompt = user_input
-                    for trg in image_triggers:
-                        clean_prompt = clean_prompt.lower().replace(trg, "").strip()
+                    # Clean words to make pure prompt for FLUX engine
+                    for word in image_keywords + ["ki", "ko", "ek", "please"]:
+                        clean_prompt = clean_prompt.lower().replace(word, "").strip()
                     
+                    # If empty prompt after cleaning, restore full user input
+                    if not clean_prompt:
+                        clean_prompt = user_input
+
                     img_response = requests.post(IMAGE_API_URL, headers=headers, json={"inputs": clean_prompt}, timeout=50)
                     
                     if img_response.status_code == 200:
-                        # Render the generated art
-                        st.image(img_response.content, caption=f"AI Artwork: {clean_prompt}", use_container_width=True)
+                        st.image(img_response.content, caption=f"AI Artwork: {user_input}", use_container_width=True)
                         
-                        # Add a download button for the user
                         st.download_button(
                             label="📥 Download HD Image",
                             data=img_response.content,
@@ -96,11 +98,11 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search live data, or ge
                             mime="image/png"
                         )
                         
-                        full_response = f"✨ Maine aapki imagination ke aadhar par **'{clean_prompt}'** ki High-Quality photo upar generate kar di hai. Aap use download button se save kar sakte hain!"
+                        full_response = f"✨ Maine aapki command ke aadhar par High-Quality photo upar generate kar di hai. Aap use download button se save kar sakte hain!"
                         response_placeholder.markdown(full_response)
                         st.session_state.messages.append({"role": "assistant", "content": full_response})
                     else:
-                        st.error("Image Server overloaded or token limit reached. Please retry in 10 seconds.")
+                        st.error("Image Server temporary busy. Please wait 10 seconds and tap send icon again.")
                 except Exception as e:
                     st.error(f"Image Module Error: {str(e)}")
         
@@ -119,7 +121,7 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search live data, or ge
             # 🧠 CHATGPT MASTER PROMPT SYSTEM
             system_prompt = (
                 "You are AG ChatGPT Plus, an advanced enterprise level AI assistant. "
-                "Today is October 9, 2026. You possess elite capabilities in complex software engineering, coding, financial analysis, data lookup, and content writing. "
+                "Today is Friday, October 9, 2026. You possess elite capabilities in complex software engineering, coding, financial analysis, data lookup, and content writing. "
                 "You MUST deeply analyze the real-time internet web data provided below and combine it with your knowledge to give complete, comprehensive, textbook-level structural answers. "
                 "Provide detailed code blocks using markdown formatting if requested."
             )
@@ -130,7 +132,6 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search live data, or ge
                 system_prompt += f"\n\n[Uploaded Secure File Context Data:]\n{file_context}"
 
             try:
-                # Execution through high-speed server endpoints
                 completion = client.chat.completions.create(
                     model=GROQ_MODEL,
                     messages=[
@@ -140,7 +141,6 @@ if user_input := st.chat_input("Ask AG ChatGPT anything, search live data, or ge
                     stream=False,
                 )
 
-                # 🎯 FIXED HERE: choices[0] array alignment for correct parsing
                 full_response = completion.choices[0].message.content
                 response_placeholder.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})

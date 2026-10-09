@@ -9,7 +9,7 @@ import os
 st.set_page_config(page_title="AG Chat.ai", page_icon="🤖", layout="centered")
 st.title("🤖 AG Chat.ai - Ultimate Live")
 st.caption("Cloud Powered: Photos, Live Search & PDF Scanning")
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "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"
 
 
 if not GROQ_API_KEY or GROQ_API_KEY == "gsk_YAHAN_APNI_REAL_KEY_PASTE_KAREIN":

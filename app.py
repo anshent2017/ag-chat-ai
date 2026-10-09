@@ -2,7 +2,7 @@ import streamlit as st
 from groq import Groq
 import os
 import requests
-import streamlit.components.v1 as components
+from streamlit_mic_recorder import speech_to_text
 
 # ChatGPT-Gemini Level Wide Production Configuration
 st.set_page_config(page_title="AG ChatGPT Plus", page_icon="🧠", layout="wide")
@@ -16,7 +16,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🧠 AG ChatGPT Plus - Executive AI")
-st.caption("2026 Enterprise Network: Clean Dynamic Interface & Global Web Crawler Active")
+st.caption("2026 Enterprise Network: Official Native Voice Search & Global Web Crawler Active")
 
 # Secure Token Configuration
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
@@ -27,82 +27,41 @@ client = Groq(api_key=GROQ_API_KEY)
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Unified Voice Processing Channel Controller
-voice_query_text = ""
+# Unified Query Processing Controller Layer
+user_input = ""
 
-# 📂 SIDEBAR: ChatGPT Plus Control Panel & FIXED VOICE SYSTEM PLACE
+# 📂 SIDEBAR: ChatGPT Plus Control Panel & NATIVE VOICE SYSTEM
 with st.sidebar:
     st.header("📂 ChatGPT Control Panel")
     st.info("Directly input prompts, create imagery, or request complex solutions.")
-    
     st.markdown("---")
-    # 🎙️ VOICE PLACED SAFELY IN SIDEBAR: Ab ye chat ke beech me bilkul nahi aayega
+    
+    # 🎙️ OFFICIAL NATIVE VOICE SEARCH (Bypasses all browser security blocks)
     st.markdown("### 🎙️ Bol Kar Search Karein:")
-    components.html("""
-        <div style="font-family: sans-serif; text-align: center; padding: 5px;">
-            <button id="voice-start" style="background-color: #1f8fff; color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 16px; cursor: pointer; font-weight: bold; width: 100%;">
-                🎙️ Tap to Speak
-            </button>
-            <div id="voice-status" style="color: #a0a0a0; font-style: italic; font-size: 13px; margin-top: 8px;">Click to talk...</div>
-        </div>
-        <script>
-            const voiceBtn = document.getElementById('voice-start');
-            const statusText = document.getElementById('voice-status');
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            
-            if (SpeechRecognition) {
-                const rec = new SpeechRecognition();
-                rec.continuous = false;
-                rec.lang = 'hi-IN'; // Multi-lingual structural mapping (Hindi + English)
-                rec.interimResults = false;
-                
-                voiceBtn.addEventListener('click', () => {
-                    rec.start();
-                    voiceBtn.style.backgroundColor = '#ff4b4b';
-                    voiceBtn.innerHTML = '🔴 Listening...';
-                    statusText.innerText = 'Speak now clearly...';
-                });
-                
-                rec.onresult = (event) => {
-                    const speechToText = event.results[0][0].transcript;
-                    statusText.innerHTML = '<b>Transmitting:</b> ' + speechToText;
-                    
-                    // 🎯 HYPER-SPEED HARD RELOAD FORM INJECTION: Targets state values via browser parameter pipeline directly
-                    const appUrl = new URL(window.parent.location.href);
-                    appUrl.searchParams.set("voice_data_stream", speechToText);
-                    window.parent.location.href = appUrl.href;
-                };
-                
-                rec.onend = () => {
-                    voiceBtn.style.backgroundColor = '#1f8fff';
-                    voiceBtn.innerHTML = '🎙️ Tap to Speak';
-                };
-            } else {
-                statusText.innerText = 'Microphone hardware connection missing.';
-            }
-        </script>
-    """, height=90)
+    voice_text = speech_to_text(
+        start_prompt="🎙️ Start Speaking",
+        stop_prompt="🛑 Stop & Process",
+        language='hi', # Captures Hindi and English seamlessly
+        use_container_width=True,
+        key='native_voice'
+    )
+    
+    if voice_text:
+        st.success(f"Captured: {voice_text}")
+        user_input = voice_text
 
-# Check for incoming voice parameters state handshake execution
-incoming_params = st.query_params
-active_stream_data = incoming_params.get("voice_data_stream", "")
-
-user_input = ""
-if active_stream_data:
-    user_input = active_stream_data
-    st.query_params.clear() # Reset parameter storage to clear refresh loop blocks
-else:
-    # Text terminal layout mapping
+# Text input configuration fallback (if not using voice)
+if not user_input:
     text_box_input = st.chat_input("Ask AG ChatGPT anything, search global data, or generate HD photos...")
     if text_box_input:
         user_input = text_box_input
 
-# Render Chat History (Bilkul clean look, beech me koi voice widget nahi)
+# Render Clean Chat History
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# Main Engine Input Controller Node Matrix
+# Main AI Processing Node Matrix
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
@@ -158,15 +117,15 @@ if user_input:
             # 🧠 CENTRAL INTELLECT CORE INSTRUCTIONS
             system_prompt = (
                 "You are AG ChatGPT Plus, a world-class autonomous AI collaborator powered by absolute web access. "
-                "Today's date is strictly verified as Friday, October 9, 2026. "
+                "Today's date is verified as Friday, October 9, 2026. "
                 "You possess absolute capability across all fields: Medicine, Politics, Business, Advanced Software Architecture, Coding, History, and Creative Writing. "
-                "Always combine the live global search data below with your neural networks to frame highly comprehensive, scannable responses using markdown format."
+                "Always combine the live global search data below with your neural networks to frame highly comprehensive, scannable responses using markdown format. "
+                "If the user asks for a story ('kahani'), song ('gana'), or poetry ('shayari'), expand it with deep creative richness."
             )
             if web_context:
                 system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
 
             try:
-                # Execution with direct parameter indexing mapping (Fixed choices syntax clash)
                 completion = client.chat.completions.create(
                     model=GROQ_MODEL,
                     messages=[
@@ -176,18 +135,8 @@ if user_input:
                     stream=False
                 )
                 
-                full_response = completion.choices[0].message.content
+                full_response = completion.choices.message.content
                 response_placeholder.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
             except Exception as api_err:
                 st.error(f"Neural Engine Connection Error: {str(api_err)}")
-
-    # 🎯 AUTOMATIC FOCUS WINDOW ALIGNMENT INTERACTION HACK
-    components.html("""
-        <script>
-            window.parent.document.querySelector('section.main').scrollTo({
-                top: window.parent.document.querySelector('section.main').scrollHeight,
-                behavior: 'smooth'
-            });
-        </script>
-    """, height=0)

@@ -15,8 +15,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("🧠 AG ChatGPT Plus - Core Master Edition")
-st.caption("2026 Active AI Framework: Unified Voice Search, Live Scraping & HD Art Pipeline")
+st.title("🧠 AG ChatGPT Plus - Executive AI")
+st.caption("2026 Enterprise Network: Clean Dynamic Interface & Global Web Crawler Active")
 
 # Secure Token Configuration
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
@@ -26,93 +26,83 @@ client = Groq(api_key=GROQ_API_KEY)
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
-if "voice_query" not in st.session_state:
-    st.session_state.voice_query = ""
 
-# SIDEBAR: Standard Data Control Panel
+# Unified Voice Processing Channel Controller
+voice_query_text = ""
+
+# 📂 SIDEBAR: ChatGPT Plus Control Panel & FIXED VOICE SYSTEM PLACE
 with st.sidebar:
-    st.header("📂 Data Panel")
-    st.info("Directly input prompts, create imagery, or request complex solutions from the central agent.")
+    st.header("📂 ChatGPT Control Panel")
+    st.info("Directly input prompts, create imagery, or request complex solutions.")
+    
+    st.markdown("---")
+    # 🎙️ VOICE PLACED SAFELY IN SIDEBAR: Ab ye chat ke beech me bilkul nahi aayega
+    st.markdown("### 🎙️ Bol Kar Search Karein:")
+    components.html("""
+        <div style="font-family: sans-serif; text-align: center; padding: 5px;">
+            <button id="voice-start" style="background-color: #1f8fff; color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 16px; cursor: pointer; font-weight: bold; width: 100%;">
+                🎙️ Tap to Speak
+            </button>
+            <div id="voice-status" style="color: #a0a0a0; font-style: italic; font-size: 13px; margin-top: 8px;">Click to talk...</div>
+        </div>
+        <script>
+            const voiceBtn = document.getElementById('voice-start');
+            const statusText = document.getElementById('voice-status');
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            
+            if (SpeechRecognition) {
+                const rec = new SpeechRecognition();
+                rec.continuous = false;
+                rec.lang = 'hi-IN'; // Multi-lingual structural mapping (Hindi + English)
+                rec.interimResults = false;
+                
+                voiceBtn.addEventListener('click', () => {
+                    rec.start();
+                    voiceBtn.style.backgroundColor = '#ff4b4b';
+                    voiceBtn.innerHTML = '🔴 Listening...';
+                    statusText.innerText = 'Speak now clearly...';
+                });
+                
+                rec.onresult = (event) => {
+                    const speechToText = event.results[0][0].transcript;
+                    statusText.innerHTML = '<b>Transmitting:</b> ' + speechToText;
+                    
+                    // 🎯 HYPER-SPEED HARD RELOAD FORM INJECTION: Targets state values via browser parameter pipeline directly
+                    const appUrl = new URL(window.parent.location.href);
+                    appUrl.searchParams.set("voice_data_stream", speechToText);
+                    window.parent.location.href = appUrl.href;
+                };
+                
+                rec.onend = () => {
+                    voiceBtn.style.backgroundColor = '#1f8fff';
+                    voiceBtn.innerHTML = '🎙️ Tap to Speak';
+                };
+            } else {
+                statusText.innerText = 'Microphone hardware connection missing.';
+            }
+        </script>
+    """, height=90)
 
-# Render Previous Session Logs
+# Check for incoming voice parameters state handshake execution
+incoming_params = st.query_params
+active_stream_data = incoming_params.get("voice_data_stream", "")
+
+user_input = ""
+if active_stream_data:
+    user_input = active_stream_data
+    st.query_params.clear() # Reset parameter storage to clear refresh loop blocks
+else:
+    # Text terminal layout mapping
+    text_box_input = st.chat_input("Ask AG ChatGPT anything, search global data, or generate HD photos...")
+    if text_box_input:
+        user_input = text_box_input
+
+# Render Chat History (Bilkul clean look, beech me koi voice widget nahi)
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 🎙️ FIXED VOICE ASSISTANT PIPELINE (Direct Session State Synchronization)
-st.markdown("### 🎙️ Voice Assistant / Bol Kar Search Karein:")
-voice_result = components.html("""
-    <div style="display: flex; align-items: center; gap: 10px; font-family: sans-serif;">
-        <button id="start-btn" style="background-color: #1f8fff; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-size: 16px; cursor: pointer; font-weight: bold;">
-            🎙️ Start Speaking
-        </button>
-        <span id="output-text" style="color: #a0a0a0; font-style: italic; font-size: 14px;">Click and speak in Hindi or English...</span>
-    </div>
-    
-    <script>
-        const startBtn = document.getElementById('start-btn');
-        const outputText = document.getElementById('output-text');
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        
-        if (SpeechRecognition) {
-            const recognition = new SpeechRecognition();
-            recognition.continuous = false;
-            recognition.lang = 'hi-IN';
-            recognition.interimResults = false;
-            
-            startBtn.addEventListener('click', () => {
-                recognition.start();
-                startBtn.style.backgroundColor = '#ff4b4b';
-                startBtn.innerHTML = '🔴 Listening...';
-            });
-            
-            recognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript;
-                outputText.innerHTML = '<b>Processing voice... Please wait.</b>';
-                
-                // 🎯 DIRECT QUERY HANDSHAKE BYPASS: Web URL search state pipeline sync
-                const streamlitRoot = window.parent.document.getElementById("root");
-                
-                // Inject input directly into text area for secondary visibility fallback
-                const textarea = window.parent.document.querySelector('textarea[aria-label="Ask AG ChatGPT anything, search global data, or generate HD photos..."]');
-                if (textarea) {
-                    textarea.value = transcript;
-                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
-                }
-                
-                // Simulating seamless framework reload via state parameters injection
-                const url = new URL(window.parent.location.href);
-                url.searchParams.set("voice_input", transcript);
-                window.parent.location.href = url.href;
-            };
-            
-            recognition.onend = () => {
-                startBtn.style.backgroundColor = '#1f8fff';
-                startBtn.innerHTML = '🎙️ Start Speaking';
-            };
-        } else {
-            outputText.innerText = 'Voice engine mismatch on this build.';
-        }
-    </script>
-""", height=50)
-
-# Check for URL parameters injection fallback for active session execution
-query_params = st.query_params
-active_voice_input = query_params.get("voice_input", "")
-
-# Unified Query Processing Controller Layer
-user_input = ""
-if active_voice_input:
-    user_input = active_voice_input
-    # Clear parameters to prevent infinite execution loop states
-    st.query_params.clear()
-else:
-    # Text input configuration fallback
-    text_input = st.chat_input("Ask AG ChatGPT anything, search global data, or generate HD photos...")
-    if text_input:
-        user_input = text_input
-
-# Main AI Processing Node Matrix
+# Main Engine Input Controller Node Matrix
 if user_input:
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
@@ -152,7 +142,7 @@ if user_input:
             # 🌐 RAW HYPER-TEXT WEB SEARCH
             web_context = ""
             try:
-                search_url = f"https://duckduckgo.com{user_input}+2026"
+                search_url = f"https://duckduckgo.com{user_input}"
                 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
                 search_response = requests.get(search_url, headers=headers, timeout=10)
                 if search_response.status_code == 200:
@@ -167,31 +157,26 @@ if user_input:
 
             # 🧠 CENTRAL INTELLECT CORE INSTRUCTIONS
             system_prompt = (
-                "You are AG ChatGPT Plus, a world-class autonomous AI collaborator. "
+                "You are AG ChatGPT Plus, a world-class autonomous AI collaborator powered by absolute web access. "
                 "Today's date is strictly verified as Friday, October 9, 2026. "
                 "You possess absolute capability across all fields: Medicine, Politics, Business, Advanced Software Architecture, Coding, History, and Creative Writing. "
-                "Always combine the live global search data below with your neural networks to frame highly comprehensive, scannable responses using markdown format. "
-                "If the user submits a thought or partial text, expand it creatively into full scripts, stories, songs, or poetry as requested."
+                "Always combine the live global search data below with your neural networks to frame highly comprehensive, scannable responses using markdown format."
             )
             if web_context:
                 system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
 
             try:
+                # Execution with direct parameter indexing mapping (Fixed choices syntax clash)
                 completion = client.chat.completions.create(
                     model=GROQ_MODEL,
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_input}
                     ],
-                    stream=True
+                    stream=False
                 )
                 
-                full_response = ""
-                for chunk in completion:
-                    if chunk.choices and chunk.choices.delta.content:
-                        full_response += chunk.choices.delta.content
-                        response_placeholder.markdown(full_response + "▌")
-                
+                full_response = completion.choices[0].message.content
                 response_placeholder.markdown(full_response)
                 st.session_state.messages.append({"role": "assistant", "content": full_response})
             except Exception as api_err:

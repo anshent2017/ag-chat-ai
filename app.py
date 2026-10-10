@@ -32,7 +32,7 @@ GROQ_VISION_MODEL = "llama-3.2-11b-vision-preview"
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ✅ अल्टीमेट फिक्स: सुरक्षित चैट इतिहास रेंडरर (पुराना दूषित डेटा अब स्क्रीन को कभी क्रैश नहीं कर पाएगा)
+# पूरी तरह से सुरक्षित चैट इतिहास रेंडरर
 for message in st.session_state.messages:
     try:
         if isinstance(message, dict) and "role" in message and "content" in message:
@@ -201,5 +201,6 @@ if user_input:
                     res = requests.post(api_url, json=payload, headers=headers, timeout=30)
                     
                     if res.status_code == 200:
-                        full_response = res.json()['choices']['message']['content']
+                        full_response = res.json()['choices'][0]['message']['content']
                         st.markdown(full_response)
+                        st.session_state.messages.append({"role": "assistant", "content": full_response})

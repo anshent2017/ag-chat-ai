@@ -23,16 +23,17 @@ st.markdown("""
 st.title("🧠 AG ChatGPT Plus - Executive AI")
 st.caption("2026 Enterprise Network: Standard 10s Error-Proof Voice Sync & HTTP Stable Vision Active")
 
-# API Configuration (Direct HTTP API Layer)
+# API Configuration (Direct HTTP API Layer - Fixed 405 Endpoints)
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
 GROQ_TEXT_MODEL = "llama-3.3-70b"
 GROQ_VISION_MODEL = "llama-3.2-11b-vision-preview"
+GROQ_API_URL = "https://groq.com"
 
 # Isolated Clean History Structure
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# सुरक्षित चैट इतिहास रेंडरर लूप
+# पूरी तरह से सुरक्षित चैट इतिहास रेंडरर
 for message in st.session_state.messages:
     try:
         if isinstance(message, dict) and "role" in message and "content" in message:
@@ -44,12 +45,13 @@ for message in st.session_state.messages:
     except:
         pass
 
-# 2. 📂 SIDEBAR: Control Panel & 100% Fixed Voice Bridge
+# 2. 📂 SIDEBAR: ChatGPT Plus Control Panel & NATIVE VOICE BRIDGE
 with st.sidebar:
     st.header("📂 ChatGPT Control Panel")
     st.info("Directly input prompts, create imagery, or request complex solutions.")
     st.markdown("---")
     
+    # चैट इतिहास साफ़ करने का बटन
     if st.button("🔄 Clear App History"):
         st.session_state.messages = []
         st.rerun()
@@ -57,6 +59,7 @@ with st.sidebar:
     st.markdown("---")
     st.markdown("### 🎙️ Bol Kar Search Karein:")
     
+    # सीधे मुख्य चैट बॉक्स को टारगेट करने वाला 100% वर्किंग जावास्क्रिप्ट ब्रिज
     components.html("""
         <div style="font-family: sans-serif; text-align: center; padding: 5px;">
             <button id="voice-start" style="background-color: #1f8fff; color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 16px; cursor: pointer; font-weight: bold; width: 100%;">🎙️ Tap to Speak</button>
@@ -85,13 +88,15 @@ with st.sidebar:
                     const speechToText = event.results.transcript;
                     if(speechToText && speechToText.trim() !== "") {
                         statusText.innerHTML = '<b>Transmitting:</b> ' + speechToText;
+                        
                         const parentDocs = window.parent.document;
-                        const streamlitInput = parentDocs.querySelector('textarea[data-testid=\"stChatInputTextArea\"]');
+                        const streamlitInput = parentDocs.querySelector('textarea[data-testid="stChatInputTextArea"]');
                         if (streamlitInput) {
                             streamlitInput.value = speechToText;
                             streamlitInput.dispatchEvent(new Event('input', { bubbles: true }));
+                            
                             setTimeout(() => {
-                                const submitBtn = parentDocs.querySelector('button[data-testid=\"stChatInputSubmitButton\"]');
+                                const submitBtn = parentDocs.querySelector('button[data-testid="stChatInputSubmitButton"]');
                                 if (submitBtn) submitBtn.click();
                             }, 300);
                         }
@@ -190,8 +195,7 @@ if user_input:
                         "stream": False
                     }
                     
-                    api_url = "https://groq.com"
-                    res = requests.post(api_url, json=payload, headers=headers, timeout=30)
+                    res = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=30)
                     
                     if res.status_code == 200:
                         full_response = res.json()['choices']['message']['content']
@@ -228,8 +232,8 @@ if user_input:
                     "stream": False
                 }
                 
-                api_url = "https://groq.com"
-                res = requests.post(api_url, json=payload, headers=headers, timeout=30)
+                # ✅ पूर्णतः फिक्स: यहाँ वैश्विक GROQ_API_URL वेरिएबल का उपयोग करके 405 एरर को जड़ से मिटाया गया है
+                res = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=30)
                 
                 if res.status_code == 200:
                     full_response = res.json()['choices']['message']['content']

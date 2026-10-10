@@ -34,9 +34,6 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if "voice_active_data" not in st.session_state:
-    st.session_state.voice_active_data = ""
-
 # 📂 SIDEBAR: ChatGPT Plus Control Panel & NATIVE VOICE SYSTEM
 with st.sidebar:
     st.header("📂 ChatGPT Control Panel")
@@ -50,7 +47,7 @@ with st.sidebar:
         st.image(Image.open(uploaded_file), caption="Uploaded Image Active", use_container_width=True)
     st.markdown("---")
     
-    # 🎙️ PERFECTED AUTONOMOUS AUTOMATIC TRIGER SYSTEM
+    # 🎙️ PERFECTED AUTONOMOUS AUTOMATIC TRIGGER SYSTEM (Fixes 'undefined' glitch)
     st.markdown("### 🎙️ Bol Kar Search Karein:")
     components.html("""
         <div style="font-family: sans-serif; text-align: center; padding: 5px;">
@@ -64,42 +61,56 @@ with st.sidebar:
             
             if (SpeechRecognition) {
                 const rec = new SpeechRecognition();
-                rec.continuous = false; rec.lang = 'hi-IN'; rec.interimResults = false;
+                rec.continuous = false; 
+                rec.lang = 'hi-IN'; 
+                rec.interimResults = false;
                 let silenceTimer;
                 
                 voiceBtn.addEventListener('click', () => {
-                    rec.start(); voiceBtn.style.backgroundColor = '#ff4b4b'; voiceBtn.innerHTML = '🔴 Listening...'; statusText.innerText = 'Speak now clearly...';
+                    rec.start(); 
+                    voiceBtn.style.backgroundColor = '#ff4b4b'; 
+                    voiceBtn.innerHTML = '🔴 Listening...'; 
+                    statusText.innerText = 'Speak now clearly...';
                 });
+                
                 rec.onsoundstart = () => clearTimeout(silenceTimer);
+                
                 rec.onsoundend = () => {
                     statusText.innerText = 'Detecting silence... processing in 10s...';
                     silenceTimer = setTimeout(() => rec.stop(), 10000);
                 };
+                
                 rec.onresult = (event) => {
                     clearTimeout(silenceTimer);
-                    const speechToText = event.results.transcript;
+                    // ✅ फिक्स: 'undefined' को रोकने के लिए सही एरे इंडेक्सिंग पाथ का उपयोग
+                    const speechToText = event.results[0][0].transcript;
                     statusText.innerHTML = '<b>Transmitting:</b> ' + speechToText;
                     
-                    const parentDocs = window.parent.document;
-                    const streamlitChatInput = parentDocs.querySelector('textarea[data-testid="stChatInputTextArea"]');
-                    if (streamlitChatInput) {
-                        streamlitChatInput.value = speechToText;
-                        streamlitChatInput.dispatchEvent(new Event('input', { bubbles: true }));
-                        setTimeout(() => {
-                            const submitBtn = parentDocs.querySelector('button[data-testid="stChatInputSubmitButton"]');
-                            if (submitBtn) submitBtn.click();
-                        }, 500);
-                    }
+                    // वॉयस इनपुट को सीधे टॉप पेरेंट यूआरएल पर भेजना
+                    const appUrl = new URL(window.parent.location.href);
+                    appUrl.searchParams.set("voice_input_payload", speechToText);
+                    window.parent.location.href = appUrl.href;
                 };
-                rec.onend = () => { voiceBtn.style.backgroundColor = '#1f8fff'; voiceBtn.innerHTML = '🎙️ Tap to Speak'; };
-            } else { statusText.innerText = 'Microphone connection missing.'; }
+                
+                rec.onend = () => { 
+                    voiceBtn.style.backgroundColor = '#1f8fff'; 
+                    voiceBtn.innerHTML = '🎙️ Tap to Speak'; 
+                };
+                
+                rec.onerror = (e) => {
+                    clearTimeout(silenceTimer);
+                    statusText.innerText = 'Error or Timeout. Try again.';
+                };
+            } else { 
+                statusText.innerText = 'Microphone connection missing.'; 
+            }
         </script>
-    """, height=100)# 🌐 DEEP SOCIAL MEDIA & GLOBAL CRAWLER ENGINE
+    """, height=140)# 🌐 DEEP SOCIAL MEDIA & GLOBAL CRAWLER ENGINE
 def fetch_global_and_social_search(query_text):
     context = ""
     query_lower = query_text.lower()
     
-    # 📸 इंस्टाग्राम डेटा एक्सट्रैक्टर
+    # इंस्टाग्राम बायो एक्सट्रैक्टर
     try:
         import instaloader
         if "instagram" in query_lower or "insta" in query_lower:
@@ -113,7 +124,7 @@ def fetch_global_and_social_search(query_text):
                     break
     except: pass
 
-    # 🌐 फेसबुक, इंस्टाग्राम और ट्विटर का पब्लिक डेटा हब
+    # सोशल मीडिया पब्लिक सर्च क्रॉलर
     try:
         encoded_query = urllib.parse.quote(query_text + " site:facebook.com OR site:instagram.com OR site:twitter.com")
         search_url = f"https://duckduckgo.com{encoded_query}"
@@ -127,7 +138,7 @@ def fetch_global_and_social_search(query_text):
                 context += "\n" + "\n".join([f"- Social Media Pipeline: {d}" for d in web_data])
     except: pass
     
-    # सामान्य गूगल/डकडकगो सर्च बैकअप पाइपलाइन
+    # सामान्य लाइव सर्च बैकअप
     if not context:
         try:
             encoded_query = urllib.parse.quote(query_text)
@@ -143,21 +154,33 @@ def fetch_global_and_social_search(query_text):
     return context
 
 # 💬 UNIFIED CONTROLLER FLOW
+user_input = ""
+
+# यूआरएल से आने वाले वॉयस पेलोड की जांच करें
+incoming_payload = st.query_params.get("voice_input_payload", "")
+if incoming_payload and incoming_payload != "undefined":
+    st.query_params.clear()  # रिफ्रेश लूप को रोकने के लिए
+    user_input = incoming_payload
+    st.session_state.messages.append({"role": "user", "content": user_input})
+    st.rerun()
+
+# चैट बॉक्स इनपुट (नॉर्मल मोड)
 text_box_input = st.chat_input("Search anything, Facebook/Instagram trends, generate photos...")
 if text_box_input:
     user_input = text_box_input
-    st.session_state["messages"].append({"role": "user", "content": user_input})
+    st.session_state.messages.append({"role": "user", "content": user_input})
+    st.rerun()
+
+# यदि कोई नया इनपुट आया है तो उसे तुरंत प्रोसेस करें
+if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
+    latest_query = st.session_state.messages[-1]["content"]
     
-    with st.chat_message("user"): 
-        st.markdown(user_input)
-        
     with st.chat_message("assistant"):
         response_placeholder = st.empty()
         with st.spinner("🔍 Scanning global servers & social media networks..."):
-            web_context = fetch_global_and_social_search(user_input)
+            web_context = fetch_global_and_social_search(latest_query)
             system_prompt = (
                 "You are AG ChatGPT Plus, a world-class autonomous AI collaborator equipped with absolute social network pipelines and an Image Studio. "
-                "If the user wants to generate, download, or mimic an image ('photo banao', 'yahi photo banao'), explain the layout and production steps clearly. "
                 "Today's date is verified as Saturday, October 10, 2026. Synthesize data into clean markdown responses."
             )
             if web_context: 
@@ -168,12 +191,11 @@ if text_box_input:
                 model=GROQ_MODEL, 
                 messages=[
                     {"role": "system", "content": system_prompt}, 
-                    {"role": "user", "content": user_input}
+                    {"role": "user", "content": latest_query}
                 ], 
                 stream=True
             )
             full_response = ""
-            # ✅ 'delta' एट्रिब्यूट एरर को रोकने के लिए सेफ़ पार्सिंग लॉजिक
             for chunk in completion:
                 if chunk.choices and len(chunk.choices) > 0:
                     delta = chunk.choices[0].delta
@@ -182,10 +204,9 @@ if text_box_input:
                         response_placeholder.markdown(full_response + "▌")
             
             response_placeholder.markdown(full_response)
-            st.session_state["messages"].append({"role": "assistant", "content": full_response})
-            st.rerun()
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
         except Exception as e:
             error_msg = f"Neural Engine Connection Error: {str(e)}"
             st.error(error_msg)
-            st.session_state["messages"].append({"role": "assistant", "content": error_msg})
+            st.session_state.messages.append({"role": "assistant", "content": error_msg})
 

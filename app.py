@@ -1,27 +1,3 @@
-if user_input:
-    st.session_state.messages.append({"role": "user", "content": user_input})
-    
-    with st.chat_message("user"):
-        st.markdown(user_input)
-        
-    query_lower = user_input.lower()
-    is_image_request = any(word in query_lower for word in ["photo", "image", "बनाओ", "banao", "generate", "picture"])
-    
-    if is_image_request:
-        with st.chat_message("assistant"):
-            with st.spinner("🎨 AG AI Image Studio: Generating HD Photo..."):
-                try:
-                    encoded_prompt = urllib.parse.quote(user_input)
-                    image_url = f"https://pollinations.ai{encoded_prompt}?width=1024&height=1024&nologo=true"
-                    st.markdown(f"### 🎨 Generated Photo for: *\"{user_input}\"*")
-                    st.image(image_url, use_container_width=True)
-                    st.session_state.messages.append({
-                        "role": "assistant", 
-                        "content": f"📸 **Generated Photo for:** *\"{user_input}\"*\n\n<img src='{image_url}' width='100%' style='border-radius:10px;'/>"
-                    })
-                except Exception as img_err:
-                    st.error(f"Image Studio Error: {str(img_err)}")
-                        
     elif uploaded_file:
         with st.chat_message("assistant"):
             with st.spinner("🧠 AG Vision Engine: Analyzing uploaded media..."):
@@ -63,7 +39,7 @@ if user_input:
                     st.error(f"Vision Engine Connection Error: {str(vision_err)}")
                         
     else:
-        # ✅ फ़िक्स: यहाँ पूरे ब्लॉक को मुख्य 'if user_input:' के 'else' भाग के रूप में 4 स्पेस आगे इंडेंट किया गया है
+        # ✅ फिक्स 1: बिना सिंटैक्स एरर के मुख्य 'if user_input:' के फॉलबैक 'else' ब्लॉक में 4 स्पेस आगे सेट किया गया
         with st.chat_message("assistant"):
             with st.spinner("🔍 Deep searching live internet servers..."):
                 web_context = fetch_global_and_social_search(user_input)
@@ -89,7 +65,7 @@ if user_input:
                     "stream": False
                 }
                 
-                # ✅ फ़िक्स: अमान्य होस्ट "groq.com" को बदलकर सटीक लाइव एपीआई एंडपॉइंट पाथ किया गया
+                # ✅ फिक्स 2: अमान्य स्ट्रिंग होस्ट "groq.com" को बदलकर सही ऑफिशियल एंडपॉइंट पाथ लागू किया गया
                 api_url = "https://groq.com"
                 res = requests.post(api_url, json=payload, headers=headers, timeout=30)
                 

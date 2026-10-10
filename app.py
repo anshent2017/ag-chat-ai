@@ -4,8 +4,6 @@ import os
 import requests
 import urllib.parse
 from bs4 import BeautifulSoup
-from PIL import Image
-import streamlit.components.v1 as components
 
 # 1. Page Configuration (Wide Mode)
 st.set_page_config(page_title="AG ChatGPT Plus", page_icon="🧠", layout="wide")
@@ -20,7 +18,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.title("🧠 AG ChatGPT Plus - Executive AI")
-st.caption("2026 Enterprise Network: Smart 10s Autonomous Voice & Central Media Studio Active")
+st.caption("2026 Enterprise Network: Active Neural Chat Platform")
 
 # Secure Token Configuration
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "") 
@@ -41,80 +39,15 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 2. 📂 SIDEBAR: Control Panel (अब फोटो अपलोडर यहीं साइड में रहेगा)
+# 2. 📂 SIDEBAR: Control Panel (सिर्फ साफ़ जानकारी के लिए)
 with st.sidebar:
     st.header("📂 ChatGPT Control Panel")
-    st.info("Directly input prompts, create imagery, or request complex solutions.")
-    st.markdown("---")
+    st.info("Directly input prompts, clear text history, and chat in real-time.")
     
-    # 📸 CENTRAL MEDIA STUDIO (अब साइडबार में सुरक्षित शिफ्ट कर दिया गया है)
-    st.markdown("### 📸 Upload Photo / Media:")
-    uploaded_file = st.file_uploader("Choose an image to analyze...", type=["jpg", "jpeg", "png"])
-    if uploaded_file:
-        st.image(Image.open(uploaded_file), caption="Uploaded File Active", use_container_width=True)
-        st.success("Media connected to chat context!")
-        
-    st.markdown("---")
-    
-    st.markdown("### 🎙️ Bol Kar Search Karein:")
-    components.html("""
-    <div style="font-family: sans-serif; text-align: center; padding: 5px;">
-        <button id="voice-start" style="background-color: #1f8fff; color: white; border: none; padding: 12px 24px; border-radius: 25px; font-size: 16px; cursor: pointer; font-weight: bold; width: 100%;">🎙️ Tap to Speak</button>
-        <div id="voice-status" style="color: #a0a0a0; font-style: italic; font-size: 13px; margin-top: 8px;">Click to talk...</div>
-    </div>
-    <script>
-        const voiceBtn = document.getElementById('voice-start');
-        const statusText = document.getElementById('voice-status');
-        const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-        if (SpeechRecognition) {
-            const rec = new SpeechRecognition();
-            rec.continuous = false;
-            rec.lang = 'hi-IN';
-            rec.interimResults = false;
-            let silenceTimer;
-            
-            voiceBtn.addEventListener('click', () => {
-                rec.start();
-                voiceBtn.style.backgroundColor = '#ff4b4b';
-                voiceBtn.innerHTML = '🔴 Listening...';
-                statusText.innerText = 'Speak now clearly...';
-            });
-            
-            rec.onsoundstart = () => clearTimeout(silenceTimer);
-            rec.onsoundend = () => {
-                statusText.innerText = 'Detecting silence... processing in 10s...';
-                silenceTimer = setTimeout(() => rec.stop(), 10000);
-            };
-            
-            rec.onresult = (event) => {
-                clearTimeout(silenceTimer);
-                const speechToText = event.results.transcript;
-                statusText.innerHTML = '<b>Transmitting:</b> ' + speechToText;
-                
-                const parentDocs = window.parent.document;
-                const streamlitInput = parentDocs.querySelector('textarea[data-testid="stChatInputTextArea"]');
-                if (streamlitInput) {
-                    streamlitInput.value = speechToText;
-                    streamlitInput.dispatchEvent(new Event('input', { bubbles: true }));
-                    setTimeout(() => {
-                        const submitBtn = parentDocs.querySelector('button[data-testid="stChatInputSubmitButton"]');
-                        if (submitBtn) { submitBtn.click(); }
-                    }, 500);
-                }
-            };
-            rec.onend = () => {
-                voiceBtn.style.backgroundColor = '#1f8fff';
-                voiceBtn.innerHTML = '🎙️ Tap to Speak';
-            };
-            rec.onerror = (e) => {
-                clearTimeout(silenceTimer);
-                statusText.innerText = 'Timeout or interrupted. Try again.';
-            };
-        } else {
-            statusText.innerText = 'Microphone missing/unsupported.';
-        }
-    </script>
-    """, height=140)
+    # चैट इतिहास साफ़ करने का बटन ताकि मेमोरी फ्रेश की जा सके
+    if st.button("🗑️ Clear Chat History", use_container_width=True):
+        st.session_state.messages = []
+        st.rerun()
 
 # 3. 🌐 लाइव वेब हब क्रॉलर फंक्शन
 def fetch_global_and_social_search(query_text):
@@ -139,64 +72,50 @@ def fetch_global_and_social_search(query_text):
         pass
     return context
 
-# 4. 💬 MAIN CHAT BOX FLOW (अब यहाँ बीच में कोई डिस्टर्बेंस नहीं होगा)
-user_input = st.chat_input("Search anything, Facebook/Instagram trends, generate photos...")
+# 4. 💬 MAIN CHAT BOX FLOW
+user_input = st.chat_input("Search anything, ask questions, explore real-time trends...")
 
 if user_input:
+    # 1. यूजर का मैसेज तुरंत लिस्ट में डालें और स्क्रीन पर दिखाएं
     st.session_state.messages.append({"role": "user", "content": user_input})
     with st.chat_message("user"):
         st.markdown(user_input)
         
-    query_lower = user_input.lower()
-    is_image_request = any(word in query_lower for word in ["photo", "image", "बनाओ", "banao", "generate", "picture"])
-    
-    if is_image_request:
-        with st.chat_message("assistant"):
-            with st.spinner("🎨 AG AI Image Studio: Generating HD Photo..."):
-                try:
-                    encoded_prompt = urllib.parse.quote(user_input)
-                    image_url = f"https://pollinations.ai{encoded_prompt}?width=1024&height=1024&nologo=true"
-                    
-                    st.markdown(f"### 🎨 Generated Photo for: *\"{user_input}\"*")
-                    st.image(image_url, use_container_width=True)
-                    
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": f"📸 [Photo Generated Successfully] View Image here: {image_url}"
-                    })
-                except Exception as img_err:
-                    st.error(f"Image Studio Error: {str(img_err)}")
-    else:
-        with st.chat_message("assistant"):
-            with st.spinner("🔍 Deep searching live internet servers..."):
-                web_context = fetch_global_and_social_search(user_input)
-                media_info = " (Note: User has uploaded an image file on the dashboard for context.)" if uploaded_file else ""
+    # 2. असिस्टेंट का रिस्पॉन्स ब्लॉक शुरू करें
+    with st.chat_message("assistant"):
+        with st.spinner("🔍 Deep searching live internet servers..."):
+            web_context = fetch_global_and_social_search(user_input)
+            
+            # बिल्कुल सटीक और छोटा जवाब देने के नियम के साथ सिस्टम प्रॉम्ट
+            system_prompt = (
+                "You are AG ChatGPT Plus, a world-class autonomous AI collaborator. "
+                "Today's date is verified as Saturday, October 10, 2026. Current West Bengal CM is Suvendu Adhikari since May 2026.\n\n"
+                "CRITICAL RESPONSE RULE: Be extremely direct, concise, and to-the-point. Do NOT provide background history, geography, old context, or long descriptions. Answer ONLY exactly what the user asks for in the minimum possible words.\n\n"
+                "CONTEXT AWARENESS: Analyze the conversation history carefully to understand pronouns or related subsequent queries smoothly.\n\n"
+                "LIVE DATA DOMINANCE OVERRIDE: You MUST strictly believe the real-time internet data provided below. Ignore your training cut-off completely and use the new live information immediately."
+            )
+            if web_context:
+                system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
+            
+            # सिस्टम प्रॉम्प्ट के साथ पूरा चैट इतिहास तैयार करें
+            api_messages = [{"role": "system", "content": system_prompt}]
+            for msg in st.session_state.messages:
+                api_messages.append({"role": msg["role"], "content": msg["content"]})
                 
-                system_prompt = (
-                    f"You are AG ChatGPT Plus, a world-class autonomous AI collaborator.{media_info} "
-                    "Today's date is verified as Saturday, October 10, 2026. Current West Bengal CM is Suvendu Adhikari since May 2026.\n\n"
-                    "CRITICAL RESPONSE RULE: Be extremely direct, concise, and to-the-point. Do NOT provide background history, geography, old context, or long descriptions. Answer ONLY exactly what the user asks for in the minimum possible words.\n\n"
-                    "CONTEXT AWARENESS: Analyze the conversation history to understand pronouns or terms like 'lowest', 'next', 'why', or 'him' based on previous queries.\n\n"
-                    "LIVE DATA DOMINANCE OVERRIDE: You MUST strictly believe the real-time internet data provided below. If it shows that a leader, CM, status, or event has changed recently in 2026, ignore your training cut-off completely and use the new live information immediately."
+            try:
+                # Groq API कॉल (choices[0] इंडेक्स एरर को पूरी तरह फिक्स कर दिया गया है)
+                completion = client.chat.completions.create(
+                    model=GROQ_MODEL,
+                    messages=api_messages,
+                    stream=False
                 )
-                if web_context:
-                    system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
+                full_response = completion.choices[0].message.content
                 
-                api_messages = [{"role": "system", "content": system_prompt}]
-                for msg in st.session_state.messages:
-                    if not msg["content"].startswith("📸 [Photo Generated"):
-                        api_messages.append({"role": msg["role"], "content": msg["content"]})
-                    
-                try:
-                    completion = client.chat.completions.create(
-                        model=GROQ_MODEL,
-                        messages=api_messages,
-                        stream=False
-                    )
-                    full_response = completion.choices.message.content
-                    st.markdown(full_response)
-                    st.session_state.messages.append({"role": "assistant", "content": full_response})
-                except Exception as e:
-                    error_msg = f"Neural Engine Connection Error: {str(e)}"
-                    st.error(error_msg)
-                    st.session_state.messages.append({"role": "assistant", "content": error_msg})
+                # स्क्रीन पर रेंडर करें और मेमोरी में सुरक्षित सेव करें
+                st.markdown(full_response)
+                st.session_state.messages.append({"role": "assistant", "content": full_response})
+                
+            except Exception as e:
+                error_msg = f"Neural Engine Connection Error: {str(e)}"
+                st.error(error_msg)
+                st.session_state.messages.append({"role": "assistant", "content": error_msg})

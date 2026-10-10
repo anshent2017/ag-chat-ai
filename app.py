@@ -107,12 +107,11 @@ with st.sidebar:
     </script>
     """, height=140)
 
-# 3. 🌐 100% वर्किंग लाइव वेब हब क्रॉलर फंक्शन (एंटी-ब्लॉक सिस्टम के साथ)
+# 3. 🌐 लाइव वेब हब क्रॉलर फंक्शन
 def fetch_global_and_social_search(query_text):
     context = ""
     try:
         encoded_query = urllib.parse.quote(query_text)
-        # DuckDuckGo Lite पाथ का इस्तेमाल जो क्लाउड पर कभी ब्लॉक नहीं होता
         search_url = f"https://duckduckgo.com"
         headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
@@ -123,15 +122,8 @@ def fetch_global_and_social_search(query_text):
         search_response = requests.post(search_url, headers=headers, data=data, timeout=8)
         if search_response.status_code == 200:
             soup = BeautifulSoup(search_response.text, 'html.parser')
-            
-            # Lite वर्शन से टेक्स्ट स्निपेट निकालने का सबसे सटीक तरीका
             tds = soup.find_all('td', class_='result-snippet')
-            web_data = []
-            for td in tds[:4]:
-                text = td.text.strip()
-                if text:
-                    web_data.append(text)
-                    
+            web_data = [td.text.strip() for td in tds[:4] if td.text.strip()]
             if web_data:
                 context = "\n".join([f"- Real-time Live Fact: {d}" for d in web_data])
     except Exception:
@@ -179,23 +171,28 @@ if user_input:
                 web_context = fetch_global_and_social_search(user_input)
                 media_info = " (Note: User has uploaded an image file on the dashboard for context.)" if uploaded_file else ""
                 
-                # शॉर्ट उत्तर + लाइव डेटा प्राथमिकता के कड़े नियम वाला सिस्टम प्रॉम्ट
+                # शॉर्ट उत्तर + लाइव डेटा प्राथमिकता नियम
                 system_prompt = (
                     f"You are AG ChatGPT Plus, a world-class autonomous AI collaborator.{media_info} "
                     "Today's date is verified as Saturday, October 10, 2026. Current West Bengal CM is Suvendu Adhikari since May 2026.\n\n"
                     "CRITICAL RESPONSE RULE: Be extremely direct, concise, and to-the-point. Do NOT provide background history, geography, old context, or long descriptions. Answer ONLY exactly what the user asks for in the minimum possible words.\n\n"
+                    "CONTEXT AWARENESS: Analyze the conversation history to understand pronouns or terms like 'lowest', 'next', 'why', or 'him' based on previous queries.\n\n"
                     "LIVE DATA DOMINANCE OVERRIDE: You MUST strictly believe the real-time internet data provided below. If it shows that a leader, CM, status, or event has changed recently in 2026, ignore your training cut-off completely and use the new live information immediately."
                 )
                 if web_context:
                     system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
+                
+                # ✅ फिक्स: सिस्टम प्रॉम्ट और पूरे पुराने चैट इतिहास को एक साथ कंबाइन करना
+                api_messages = [{"role": "system", "content": system_prompt}]
+                for msg in st.session_state.messages:
+                    # केवल टेक्स्ट मैसेजेस को इतिहास में भेजें (इमेज जनरेशन लॉग्स को इग्नोर करें ताकि कॉन्टेक्स्ट साफ़ रहे)
+                    if not msg["content"].startswith("📸 [Photo Generated"):
+                        api_messages.append({"role": msg["role"], "content": msg["content"]})
                     
                 try:
                     completion = client.chat.completions.create(
                         model=GROQ_MODEL,
-                        messages=[
-                            {"role": "system", "content": system_prompt},
-                            {"role": "user", "content": user_input}
-                        ],
+                        messages=api_messages,
                         stream=False
                     )
                     full_response = completion.choices[0].message.content

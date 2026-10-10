@@ -41,10 +41,19 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 2. 📂 SIDEBAR: Control Panel Only
+# 2. 📂 SIDEBAR: Control Panel (अब फोटो अपलोडर यहीं साइड में रहेगा)
 with st.sidebar:
     st.header("📂 ChatGPT Control Panel")
     st.info("Directly input prompts, create imagery, or request complex solutions.")
+    st.markdown("---")
+    
+    # 📸 CENTRAL MEDIA STUDIO (अब साइडबार में सुरक्षित शिफ्ट कर दिया गया है)
+    st.markdown("### 📸 Upload Photo / Media:")
+    uploaded_file = st.file_uploader("Choose an image to analyze...", type=["jpg", "jpeg", "png"])
+    if uploaded_file:
+        st.image(Image.open(uploaded_file), caption="Uploaded File Active", use_container_width=True)
+        st.success("Media connected to chat context!")
+        
     st.markdown("---")
     
     st.markdown("### 🎙️ Bol Kar Search Karein:")
@@ -130,15 +139,7 @@ def fetch_global_and_social_search(query_text):
         pass
     return context
 
-# 4. 📸 CENTRAL MEDIA STUDIO
-st.markdown("---")
-st.markdown("### 📸 Upload Photo / Media / File (यहाँ से कुछ भी अपलोड करें):")
-uploaded_file = st.file_uploader("Choose an image or document to analyze...", type=["jpg", "jpeg", "png"])
-
-if uploaded_file:
-    st.image(Image.open(uploaded_file), caption="Uploaded File Active", width=400)
-
-# 5. 💬 MAIN CHAT BOX FLOW
+# 4. 💬 MAIN CHAT BOX FLOW (अब यहाँ बीच में कोई डिस्टर्बेंस नहीं होगा)
 user_input = st.chat_input("Search anything, Facebook/Instagram trends, generate photos...")
 
 if user_input:
@@ -171,7 +172,6 @@ if user_input:
                 web_context = fetch_global_and_social_search(user_input)
                 media_info = " (Note: User has uploaded an image file on the dashboard for context.)" if uploaded_file else ""
                 
-                # शॉर्ट उत्तर + लाइव डेटा प्राथमिकता नियम
                 system_prompt = (
                     f"You are AG ChatGPT Plus, a world-class autonomous AI collaborator.{media_info} "
                     "Today's date is verified as Saturday, October 10, 2026. Current West Bengal CM is Suvendu Adhikari since May 2026.\n\n"
@@ -182,10 +182,8 @@ if user_input:
                 if web_context:
                     system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
                 
-                # ✅ फिक्स: सिस्टम प्रॉम्ट और पूरे पुराने चैट इतिहास को एक साथ कंबाइन करना
                 api_messages = [{"role": "system", "content": system_prompt}]
                 for msg in st.session_state.messages:
-                    # केवल टेक्स्ट मैसेजेस को इतिहास में भेजें (इमेज जनरेशन लॉग्स को इग्नोर करें ताकि कॉन्टेक्स्ट साफ़ रहे)
                     if not msg["content"].startswith("📸 [Photo Generated"):
                         api_messages.append({"role": msg["role"], "content": msg["content"]})
                     
@@ -195,7 +193,7 @@ if user_input:
                         messages=api_messages,
                         stream=False
                     )
-                    full_response = completion.choices[0].message.content
+                    full_response = completion.choices.message.content
                     st.markdown(full_response)
                     st.session_state.messages.append({"role": "assistant", "content": full_response})
                 except Exception as e:

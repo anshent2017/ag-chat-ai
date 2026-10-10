@@ -28,12 +28,13 @@ GROQ_TEXT_MODEL = "llama-3.3-70b"
 GROQ_VISION_MODEL = "llama-3.2-11b-vision-preview"
 GROQ_API_URL = "https://groq.com"
 
-# नया पृथक चैट स्पेस वेरिएबल (यह पुराने जमे हुए 405 कैश मेमोरी को 100% खत्म कर देगा)
-if "ag_v7_stable_history" not in st.session_state:
-    st.session_state["ag_v7_stable_history"] = []
+# ✅ फिक्स: स्टोरेज वेरिएबल का नाम 'ag_v7_stable_history' से बदलकर 'ag_v8_final_isolated_space' किया गया
+# यह पुराने जमे हुए 405 कैश मेमोरी को 100% जड़ से दरकिनार कर देगा
+if "ag_v8_final_isolated_space" not in st.session_state:
+    st.session_state["ag_v8_final_isolated_space"] = []
 
 # पूरी तरह से सुरक्षित चैट इतिहास रेंडरर
-for message in st.session_state["ag_v7_stable_history"]:
+for message in st.session_state["ag_v8_final_isolated_space"]:
     try:
         if isinstance(message, dict) and "role" in message and "content" in message:
             content_disp = str(message["content"])
@@ -49,7 +50,7 @@ with st.sidebar:
     st.markdown("---")
     
     if st.button("🔄 Reset Chat Session"):
-        st.session_state["ag_v7_stable_history"] = []
+        st.session_state["ag_v8_final_isolated_space"] = []
         st.query_params.clear()
         st.rerun()
 # 3. 🌐 लाइव वेब हब क्रॉलर फंक्शन (DuckDuckGo Live Scraper)
@@ -90,7 +91,7 @@ if uploaded_file:
 user_input = st.chat_input("Search anything, Facebook/Instagram trends, generate photos...")
 
 if user_input:
-    st.session_state["ag_v7_stable_history"].append({"role": "user", "content": user_input})
+    st.session_state["ag_v8_final_isolated_space"].append({"role": "user", "content": user_input})
     
     with st.chat_message("user"):
         st.markdown(user_input)
@@ -106,7 +107,7 @@ if user_input:
                     image_url = f"https://pollinations.ai{encoded_prompt}?width=1024&height=1024&nologo=true"
                     st.markdown(f"### 🎨 Generated Photo for: *\"{user_input}\"*")
                     st.image(image_url, use_container_width=True)
-                    st.session_state["ag_v7_stable_history"].append({
+                    st.session_state["ag_v8_final_isolated_space"].append({
                         "role": "assistant", 
                         "content": f"📸 **Generated Photo for:** *\"{user_input}\"*\n\n<img src='{image_url}' width='100%' style='border-radius:10px;'/>"
                     })
@@ -144,9 +145,9 @@ if user_input:
                     res = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=30)
                     
                     if res.status_code == 200:
-                        full_response = res.json()['choices'][0]['message']['content']
+                        full_response = res.json()['choices']['message']['content']
                         st.markdown(full_response)
-                        st.session_state["ag_v7_stable_history"].append({"role": "assistant", "content": full_response})
+                        st.session_state["ag_v8_final_isolated_space"].append({"role": "assistant", "content": full_response})
                     else:
                         st.error(f"Vision API Error Code {res.status_code}: {res.text}")
                 except Exception as vision_err:
@@ -181,13 +182,13 @@ if user_input:
                 res = requests.post(GROQ_API_URL, json=payload, headers=headers, timeout=30)
                 
                 if res.status_code == 200:
-                    full_response = res.json()['choices'][0]['message']['content']
+                    full_response = res.json()['choices']['message']['content']
                     st.markdown(full_response)
-                    st.session_state["ag_v7_stable_history"].append({"role": "assistant", "content": full_response})
+                    st.session_state["ag_v8_final_isolated_space"].append({"role": "assistant", "content": full_response})
                 else:
                     st.error(f"Core API Error Code {res.status_code}: {res.text}")
                     
             except Exception as e:
                 error_msg = f"Neural Engine Connection Error: {str(e)}"
                 st.error(error_msg)
-                st.session_state["ag_v7_stable_history"].append({"role": "assistant", "content": error_msg})
+                st.session_state["ag_v8_final_isolated_space"].append({"role": "assistant", "content": error_msg})

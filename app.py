@@ -22,12 +22,12 @@ st.markdown("""
 st.title("🧠 AG ChatGPT Plus - Executive AI")
 st.caption("2026 Enterprise Network: Smart 10s Autonomous Voice & Central Media Studio Active")
 
-# सुरक्षित टोकन कॉन्फ़िगरेशन - अपनी Groq API Key को सिस्टम एनवायरनमेंट में GROQ_API_KEY नाम से सेट करें
+# Secure Token Configuration
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "") 
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b")
 
 if not GROQ_API_KEY:
-    st.error("❌ GROQ_API_KEY नहीं मिली! कृपया इसे अपने Environment Variables या Streamlit Secrets में सेट करें।")
+    st.error("❌ GROQ_API_KEY नहीं मिली! कृपया इसे अपने Environment Variables में सेट करें।")
     st.stop()
 
 client = Groq(api_key=GROQ_API_KEY)
@@ -79,7 +79,7 @@ with st.sidebar:
             
             rec.onresult = (event) => {
                 clearTimeout(silenceTimer);
-                const speechToText = event.results[0][0].transcript;
+                const speechToText = event.results.transcript;
                 statusText.innerHTML = '<b>Transmitting:</b> ' + speechToText;
                 
                 const parentDocs = window.parent.document;
@@ -107,21 +107,32 @@ with st.sidebar:
     </script>
     """, height=140)
 
-# 3. 🌐 लाइव वेब हब क्रॉलर फंक्शन
+# 3. 🌐 लाइव वेब हब क्रॉलर फंक्शन (पूरी तरह अपडेटेड और लाइव)
 def fetch_global_and_social_search(query_text):
     context = ""
     try:
         encoded_query = urllib.parse.quote(query_text)
+        # DuckDuckGo का बिल्कुल सही HTML सर्च एंडपॉइंट
         search_url = f"https://duckduckgo.com{encoded_query}"
-        headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+        }
         
         search_response = requests.get(search_url, headers=headers, timeout=10)
         if search_response.status_code == 200:
             soup = BeautifulSoup(search_response.text, 'html.parser')
-            links = soup.find_all('td', class_='result-snippet') or soup.find_all('a', class_='result__snippet')
-            web_data = [l.text.strip() for l in links[:3]]
+            
+            # नई सटीक क्लासेस जो DuckDuckGo से लाइव स्निपेट्स और टेक्स्ट निकालती हैं
+            links = soup.find_all('td', class_='result-snippet') or soup.find_all('a', class_='result__snippet') or soup.find_all('div', class_='result__snippet')
+            
+            web_data = []
+            for l in links[:4]:
+                text = l.text.strip()
+                if text:
+                    web_data.append(text)
+                    
             if web_data:
-                context = "\n".join([f"- Live Source: {d}" for d in web_data])
+                context = "\n".join([f"- Real-time Live Source: {d}" for d in web_data])
     except Exception:
         pass
     return context
@@ -167,14 +178,17 @@ if user_input:
                 web_context = fetch_global_and_social_search(user_input)
                 media_info = " (Note: User has uploaded an image file on the dashboard for context.)" if uploaded_file else ""
                 
-                # यहाँ नया सख्त प्रॉम्ट डाला गया है ताकि फालतू का इतिहास न आए
+                # लाइव डेटा को ही सच मानने के लिए कठोर नियम वाला सिस्टम प्रॉम्ट
                 system_prompt = (
                     f"You are AG ChatGPT Plus, a world-class autonomous AI collaborator.{media_info} "
                     "Today's date is verified as Saturday, October 10, 2026. "
-                    "CRITICAL RESPONSE RULE: Be extremely direct, concise, and to-the-point. Do NOT provide background history, geography, context, or long descriptions unless explicitly asked by the user. Answer ONLY exactly what the user asks for in the shortest possible way."
+                    "CRITICAL RESPONSE RULE: Be extremely direct, concise, and to-the-point. Do NOT provide background history, geography, context, or long descriptions unless explicitly asked. Answer ONLY exactly what the user asks for in the shortest possible way.\n\n"
+                    "LIVE SEARCH OVERRIDE RULE: You MUST prioritize the real-time live internet data provided below over your pre-trained knowledge. For example, if a position, leader, or event has changed in 2026 according to the data below, state that new fact immediately. Do not use outdated knowledge."
                 )
                 if web_context:
                     system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
+                else:
+                    system_prompt += "\n\n(Warning: No live data fetched. Alert the user that live searching failed temporarily.)"
                     
                 try:
                     completion = client.chat.completions.create(

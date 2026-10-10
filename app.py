@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 from PIL import Image
 import streamlit.components.v1 as components
 
-# 1. ChatGPT-Gemini Level Wide Production Configuration
+# 1. Page Configuration (Wide Mode)
 st.set_page_config(page_title="AG ChatGPT Plus", page_icon="🧠", layout="wide")
 
 st.markdown("""
@@ -15,11 +15,13 @@ st.markdown("""
     .reportview-container { background: #1e1e2e; }
     h1 { color: #1f8fff; font-weight: 700; }
     .stChatMessage { border-radius: 10px; margin-bottom: 10px; }
+    /* चैट इनपुट एरिया को थोड़ा साफ़ रखने के लिए स्टाइल */
+    .block-container { padding-bottom: 150px; }
     </style>
 """, unsafe_allow_html=True)
 
 st.title("🧠 AG ChatGPT Plus - Executive AI")
-st.caption("2026 Enterprise Network: Smart 10s Autonomous Voice & HD Image Studio Active")
+st.caption("2026 Enterprise Network: Smart 10s Autonomous Voice & Central Media Studio Active")
 
 # Secure Token Configuration
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "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")
@@ -35,20 +37,13 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# 2. 📂 SIDEBAR: ChatGPT Control Panel & FIXED NATIVE VOICE SYSTEM
+# 2. 📂 SIDEBAR: Control Panel Only
 with st.sidebar:
     st.header("📂 ChatGPT Control Panel")
     st.info("Directly input prompts, create imagery, or request complex solutions.")
     st.markdown("---")
     
-    # 📸 फोटो अपलोडर
-    st.markdown("### 📸 Upload Photo / Media:")
-    uploaded_file = st.file_uploader("Choose an image to analyze...", type=["jpg", "jpeg", "png"])
-    if uploaded_file:
-        st.image(Image.open(uploaded_file), caption="Uploaded Image Active", use_container_width=True)
-    st.markdown("---")
-    
-    # 🎙️ 100% फिक्स्ड जावास्क्रिप्ट वॉयस ट्रांसमिशन पाइपलाइन
+    # 🎙️ वॉयस इंजन को साइडबार में ही रखा है लेकिन इसका जावास्क्रिप्ट नीचे इनपुट बॉक्स को हिट करेगा
     st.markdown("### 🎙️ Bol Kar Search Karein:")
     components.html("""
         <div style="font-family: sans-serif; text-align: center; padding: 5px;">
@@ -62,9 +57,7 @@ with st.sidebar:
             
             if (SpeechRecognition) {
                 const rec = new SpeechRecognition();
-                rec.continuous = false; 
-                rec.lang = 'hi-IN'; 
-                rec.interimResults = false;
+                rec.continuous = false; rec.lang = 'hi-IN'; rec.interimResults = false;
                 let silenceTimer;
                 
                 voiceBtn.addEventListener('click', () => {
@@ -75,7 +68,6 @@ with st.sidebar:
                 });
                 
                 rec.onsoundstart = () => clearTimeout(silenceTimer);
-                
                 rec.onsoundend = () => {
                     statusText.innerText = 'Detecting silence... processing in 10s...';
                     silenceTimer = setTimeout(() => rec.stop(), 10000);
@@ -83,14 +75,25 @@ with st.sidebar:
                 
                 rec.onresult = (event) => {
                     clearTimeout(silenceTimer);
-                    // ✅ 100% सही एरे पाथ वॉयस टेक्स्ट निकालने के लिए (Fixes 'undefined')
                     const speechToText = event.results[0][0].transcript;
                     statusText.innerHTML = '<b>Transmitting:</b> ' + speechToText;
                     
-                    // यूआरएल पैरामीटर के माध्यम से पायथन सर्वर को तुरंत डेटा भेजना
-                    const appUrl = new URL(window.parent.location.href);
-                    appUrl.searchParams.set("voice_input_payload", speechToText);
-                    window.parent.location.href = appUrl.href;
+                    // ✅ न्यू ऑटो-सबमिट फिक्स: सीधे पेरेंट Streamlit के चैट इनपुट बॉक्स में टेक्स्ट इंजेक्ट करके क्लिक ट्रिगर करना
+                    const parentDocs = window.parent.document;
+                    const streamlitInput = parentDocs.querySelector('textarea[data-testid="stChatInputTextArea"]');
+                    
+                    if (streamlitInput) {
+                        streamlitInput.value = speechToText;
+                        streamlitInput.dispatchEvent(new Event('input', { bubbles: true }));
+                        
+                        // आधा सेकंड का डिले देकर सबमिट बटन को आटोमैटिक क्लिक करना
+                        setTimeout(() => {
+                            const submitBtn = parentDocs.querySelector('button[data-testid="stChatInputSubmitButton"]');
+                            if (submitBtn) {
+                                submitBtn.click();
+                            }
+                        }, 500);
+                    }
                 };
                 
                 rec.onend = () => { 
@@ -100,10 +103,10 @@ with st.sidebar:
                 
                 rec.onerror = (e) => {
                     clearTimeout(silenceTimer);
-                    statusText.innerText = 'Error or Timeout. Try again.';
+                    statusText.innerText = 'Timeout or interrupted. Try again.';
                 };
             } else { 
-                statusText.innerText = 'Microphone connection missing/unsupported.'; 
+                statusText.innerText = 'Microphone missing/unsupported.'; 
             }
         </script>
     """, height=140)
@@ -126,45 +129,41 @@ def fetch_global_and_social_search(query_text):
         pass
     return context
 
-# 4. 💬 UNIFIED CONTROLLER FLOW (एकीकृत पायथन बैकएंड इंजन)
-user_input = ""
+# 4. 📸 CENTRAL MEDIA STUDIO (फोटो अपलोडर अब नीचे इनपुट के ठीक ऊपर शिफ्ट कर दिया गया है)
+st.markdown("---")
+st.markdown("### 📸 Upload Photo / Media / File (यहाँ से कुछ भी अपलोड करें):")
+uploaded_file = st.file_uploader("Choose an image or document to analyze...", type=["jpg", "jpeg", "png"])
 
-# यूआरएल से आने वाले वॉयस पेलोड को पकड़ें
-if "voice_input_payload" in st.query_params:
-    v_payload = st.query_params["voice_input_payload"]
-    if v_payload and v_payload != "undefined" and v_payload != "":
-        user_input = v_payload
-        st.query_params.clear()  # लूप इनफिनिटी रोकने के लिए साफ करें
-        st.session_state.messages.append({"role": "user", "content": user_input})
-        st.rerun()
+# यदि यूजर फोटो अपलोड करता है तो उसे तुरंत स्क्रीन पर डिस्प्ले करें
+if uploaded_file:
+    st.image(Image.open(uploaded_file), caption="Uploaded File Active", width=400)
 
-# चैट बॉक्स इनपुट (कीबोर्ड इनपुट)
-text_box_input = st.chat_input("Search anything, Facebook/Instagram trends, generate photos...")
-if text_box_input:
-    user_input = text_box_input
+# 5. 💬 MAIN CHAT BOX FLOW
+user_input = st.chat_input("Search anything, Facebook/Instagram trends, generate photos...")
+
+if user_input:
+    # यूजर का इनपुट सेशन स्टेट में डालें
     st.session_state.messages.append({"role": "user", "content": user_input})
-    st.rerun()
-
-# 5. CORE EXECUTION ENGINE (डेटा प्रोसेसिंग ब्लॉक)
-if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
-    latest_query = st.session_state.messages[-1]["content"]
-    query_lower = latest_query.lower()
     
-    # 📸 चेक करें: क्या यूजर फोटो/इमेज बनाने के लिए कह रहा है?
-    is_image_request = any(word in query_lower for word in ["photo", "image", "बनाओ", "banao", "generate", "picture", "शायरी फोटो"])
+    # तुरंत स्क्रीन पर रेंडर करें
+    with st.chat_message("user"):
+        st.markdown(user_input)
+        
+    query_lower = user_input.lower()
+    
+    # 🎨 चेक करें: क्या यूजर फोटो बनाने के लिए कह रहा है?
+    is_image_request = any(word in query_lower for word in ["photo", "image", "बनाओ", "banao", "generate", "picture"])
     
     if is_image_request:
         with st.chat_message("assistant"):
             with st.spinner("🎨 AG AI Image Studio: Generating HD Photo..."):
                 try:
-                    # इमेज जनरेशन हेतु सही प्रॉम्प्ट रिज़ॉल्यूशन पाथ
-                    encoded_prompt = urllib.parse.quote(latest_query)
+                    encoded_prompt = urllib.parse.quote(user_input)
                     image_url = f"https://pollinations.ai{encoded_prompt}?width=1024&height=1024&nologo=true"
                     
-                    st.markdown(f"### 🎨 Generated Photo for: *\"{latest_query}\"*")
+                    st.markdown(f"### 🎨 Generated Photo for: *\"{user_input}\"*")
                     st.image(image_url, use_container_width=True)
                     
-                    # चैट इतिहास में इमेज विवरण सहेजें
                     st.session_state.messages.append({
                         "role": "assistant", 
                         "content": f"📸 [Photo Generated Successfully] View Image here: {image_url}"
@@ -172,12 +171,16 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                 except Exception as img_err:
                     st.error(f"Image Studio Error: {str(img_err)}")
     else:
-        # 💬 सामान्य टेक्स्ट खोज या चैट प्रोसेसिंग (100% स्थिर नो-स्ट्रीम मोड जो एरर रोकेगा)
+        # 💬 सामान्य खोज या चैट प्रोसेसिंग (Stable Execution Mode)
         with st.chat_message("assistant"):
             with st.spinner("🔍 Deep searching live internet servers..."):
-                web_context = fetch_global_and_social_search(latest_query)
+                web_context = fetch_global_and_social_search(user_input)
+                
+                # प्रॉम्प्ट में फोटो अपलोड की जानकारी जोड़ना यदि मौजूद हो
+                media_info = " (Note: User has uploaded an image file on the dashboard for context.)" if uploaded_file else ""
+                
                 system_prompt = (
-                    "You are AG ChatGPT Plus, a world-class autonomous AI collaborator. "
+                    f"You are AG ChatGPT Plus, a world-class autonomous AI collaborator.{media_info} "
                     "Today's date is verified as Saturday, October 10, 2026. "
                     "Always combine the live global search data below with your neural networks to frame highly comprehensive responses."
                 )
@@ -185,12 +188,11 @@ if st.session_state.messages and st.session_state.messages[-1]["role"] == "user"
                     system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"
                     
             try:
-                # 'delta' एट्रिब्यूट एरर को हमेशा के लिए समाप्त करने हेतु stream=False का सुरक्षित उपयोग
                 completion = client.chat.completions.create(
                     model=GROQ_MODEL, 
                     messages=[
                         {"role": "system", "content": system_prompt}, 
-                        {"role": "user", "content": latest_query}
+                        {"role": "user", "content": user_input}
                     ], 
                     stream=False
                 )

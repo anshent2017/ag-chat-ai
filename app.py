@@ -22,12 +22,12 @@ st.markdown("""
 st.title("🧠 AG ChatGPT Plus - Executive AI")
 st.caption("2026 Enterprise Network: Smart 10s Autonomous Voice & Central Media Studio Active")
 
-# सुरक्षित टोकन कॉन्फ़िगरेशन - अपनी असली API Key सिस्टम एनवायरनमेंट में सेट करें
+# सुरक्षित टोकन कॉन्फ़िगरेशन - अपनी Groq API Key को सिस्टम एनवायरनमेंट में GROQ_API_KEY नाम से सेट करें
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "") 
 GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b")
 
 if not GROQ_API_KEY:
-    st.error("❌ GROQ_API_KEY नहीं मिली! कृपया इसे अपने Environment Variables में सेट करें।")
+    st.error("❌ GROQ_API_KEY नहीं मिली! कृपया इसे अपने Environment Variables या Streamlit Secrets में सेट करें।")
     st.stop()
 
 client = Groq(api_key=GROQ_API_KEY)
@@ -107,12 +107,11 @@ with st.sidebar:
     </script>
     """, height=140)
 
-# 3. 🌐 लाइव वेब हब क्रॉलर फंक्शन (सुधरा हुआ)
+# 3. 🌐 लाइव वेब हब क्रॉलर फंक्शन
 def fetch_global_and_social_search(query_text):
     context = ""
     try:
         encoded_query = urllib.parse.quote(query_text)
-        # DuckDuckGo का सही HTML सर्च यूआरएल पाथ
         search_url = f"https://duckduckgo.com{encoded_query}"
         headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
         
@@ -151,7 +150,6 @@ if user_input:
             with st.spinner("🎨 AG AI Image Studio: Generating HD Photo..."):
                 try:
                     encoded_prompt = urllib.parse.quote(user_input)
-                    # Pollinations AI का बिल्कुल सही एंडपॉइंट पाथ
                     image_url = f"https://pollinations.ai{encoded_prompt}?width=1024&height=1024&nologo=true"
                     
                     st.markdown(f"### 🎨 Generated Photo for: *\"{user_input}\"*")
@@ -169,10 +167,11 @@ if user_input:
                 web_context = fetch_global_and_social_search(user_input)
                 media_info = " (Note: User has uploaded an image file on the dashboard for context.)" if uploaded_file else ""
                 
+                # यहाँ नया सख्त प्रॉम्ट डाला गया है ताकि फालतू का इतिहास न आए
                 system_prompt = (
                     f"You are AG ChatGPT Plus, a world-class autonomous AI collaborator.{media_info} "
                     "Today's date is verified as Saturday, October 10, 2026. "
-                    "Always combine the live global search data below with your neural networks to frame highly comprehensive responses."
+                    "CRITICAL RESPONSE RULE: Be extremely direct, concise, and to-the-point. Do NOT provide background history, geography, context, or long descriptions unless explicitly asked by the user. Answer ONLY exactly what the user asks for in the shortest possible way."
                 )
                 if web_context:
                     system_prompt += f"\n\n[UNIVERSAL LIVE WEB PIPELINE DATA (2026):]\n{web_context}"

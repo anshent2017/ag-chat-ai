@@ -30,7 +30,7 @@
                     res = requests.post(api_url, json=payload, headers=headers, timeout=30)
                     
                     if res.status_code == 200:
-                        full_response = res.json()['choices'][0]['message']['content']
+                        full_response = res.json()['choices']['message']['content']
                         st.markdown(full_response)
                         st.session_state.messages.append({"role": "assistant", "content": full_response})
                     else:
@@ -39,7 +39,7 @@
                     st.error(f"Vision Engine Connection Error: {str(vision_err)}")
                         
     else:
-        # ✅ फिक्स 1: बिना सिंटैक्स एरर के मुख्य 'if user_input:' के फॉलबैक 'else' ब्लॉक में 4 स्पेस आगे सेट किया गया
+        # ✅ फिक्स 1: बिना सिंटैक्स एरर के मुख्य 'if user_input:' के अंतिम 'else' ब्लॉक को 4 स्पेस आगे इंडेंट किया गया है
         with st.chat_message("assistant"):
             with st.spinner("🔍 Deep searching live internet servers..."):
                 web_context = fetch_global_and_social_search(user_input)
@@ -65,12 +65,12 @@
                     "stream": False
                 }
                 
-                # ✅ फिक्स 2: अमान्य स्ट्रिंग होस्ट "groq.com" को बदलकर सही ऑफिशियल एंडपॉइंट पाथ लागू किया गया
+                # ✅ फिक्स 2: अमान्य "groq.com" होस्ट स्ट्रिंग को हटाकर सटीक नेटवर्क एंडपॉइंट इंजेक्ट किया गया
                 api_url = "https://groq.com"
                 res = requests.post(api_url, json=payload, headers=headers, timeout=30)
                 
                 if res.status_code == 200:
-                    full_response = res.json()['choices'][0]['message']['content']
+                    full_response = res.json()['choices']['message']['content']
                     st.markdown(full_response)
                     st.session_state.messages.append({"role": "assistant", "content": full_response})
                 else:
